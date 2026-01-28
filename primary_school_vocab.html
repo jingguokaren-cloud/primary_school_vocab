@@ -176,14 +176,42 @@
             animation: shake 0.3s ease-in-out;
         }
 
-        /* 田字格样式 */
+        /* 米字格样式 */
         .hanzi-container {
-            background-image: linear-gradient(0deg, transparent 24%, #e5e7eb 25%, #e5e7eb 26%, transparent 27%, transparent 74%, #e5e7eb 75%, #e5e7eb 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #e5e7eb 25%, #e5e7eb 26%, transparent 27%, transparent 74%, #e5e7eb 75%, #e5e7eb 76%, transparent 77%, transparent);
-            background-size: 75px 75px;
+            position: relative;
+            background-image:
+                /* 横线和竖线 (田字格) */
+                linear-gradient(0deg, transparent 49%, #e5e7eb 49.5%, #e5e7eb 50.5%, transparent 51%),
+                linear-gradient(90deg, transparent 49%, #e5e7eb 49.5%, #e5e7eb 50.5%, transparent 51%);
+            background-size: 100% 100%;
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
             background-color: white;
             border-radius: 16px;
             cursor: crosshair;
+            overflow: hidden;
+        }
+
+        /* 对角线使用伪元素 */
+        .hanzi-container::before,
+        .hanzi-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 141.4%;
+            height: 1px;
+            background-color: #e5e7eb;
+            transform-origin: 0 0;
+            pointer-events: none;
+        }
+
+        .hanzi-container::before {
+            transform: rotate(45deg);
+        }
+
+        .hanzi-container::after {
+            top: 100%;
+            transform: rotate(-45deg);
         }
 
         .shake {
