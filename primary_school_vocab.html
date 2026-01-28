@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>王一恒小学语文生字听写</title>
+
+    <!-- BootCDN 国内最稳定CDN -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <!-- HanziWriter - 使用与旧版本相同的 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS 预编译样式表 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+
+    <!-- 全局错误捕获 -->
+    <script>
+        window.onerror = function (msg, url, line, col, error) {
+            var div = document.createElement('div');
+            div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:9999;padding:20px;font-family:monospace;color:red;overflow:auto;';
+            div.innerHTML = '<h3 style="color:black">⚠️ 程序启动遇到错误</h3>' +
+                '<p><strong>Error:</strong> ' + msg + '</p>' +
+                '<p><strong>Location:</strong> Line ' + line + ':' + col + '</p>' +
+                '<p><strong>URL:</strong> ' + (url || '(empty)') + '</p>' +
+                '<pre style="background:#f0f0f0;padding:10px;">' + (error ? error.stack : 'No stack trace') + '</pre>' +
+                '<button onclick="location.reload()" style="padding:10px 20px;margin-top:20px;font-size:16px;">刷新重试</button>';
+            document.body.appendChild(div);
+            return false;
+        };
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hanzi-grid-bg {
+            background-image:
+                linear-gradient(to right, rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 50% 50%;
+        }
+
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Tailwind 3.x 的新特性补充 */
+        .bg-clip-text {
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .text-transparent {
+            color: transparent;
+        }
+
+        .bg-gradient-to-r {
+            background-image: linear-gradient(to right, var(--tw-gradient-stops));
+        }
+
+        .from-blue-600 {
+            --tw-gradient-from: #2563eb;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent);
+        }
+
+        .to-indigo-600 {
+            --tw-gradient-to: #4f46e5;
+        }
+
+        .rounded-\[40px\] {
+            border-radius: 40px;
+        }
+
+        .shadow-green-200 {
+            --tw-shadow-color: #bbf7d0;
+            box-shadow: 0 10px 15px -3px var(--tw-shadow-color);
+        }
+
+        .shadow-blue-200 {
+            --tw-shadow-color: #bfdbfe;
+            box-shadow: 0 10px 15px -3px var(--tw-shadow-color);
+        }
+
+        .shadow-indigo-200 {
+            --tw-shadow-color: #c7d2fe;
+            box-shadow: 0 10px 15px -3px var(--tw-shadow-color);
+        }
+
+        .aspect-square {
+            aspect-ratio: 1 / 1;
+        }
+
+        .min-h-screen {
+            min-height: 100vh;
+        }
+
+        /* 动画 */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .animate-shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        /* 田字格样式 */
+        .hanzi-container {
+            background-image: linear-gradient(0deg, transparent 24%, #e5e7eb 25%, #e5e7eb 26%, transparent 27%, transparent 74%, #e5e7eb 75%, #e5e7eb 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #e5e7eb 25%, #e5e7eb 26%, transparent 27%, transparent 74%, #e5e7eb 75%, #e5e7eb 76%, transparent 77%, transparent);
+            background-size: 75px 75px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+            background-color: white;
+            border-radius: 16px;
+            cursor: crosshair;
+        }
+
+        .shake {
+            animation: shake-strong 0.4s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake-strong {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <!-- 独立的 HanziWriter 容器，不受 React 管理 -->
+    <div id="hanzi-writer-container" style="display: none; position: fixed; pointer-events: none;"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        // ==========================================
+        //              数据中心 (Data Center)
+        // ==========================================
+
+        // 词语拼音表 (包含多音字和常用词)
+        const POLYPHONE_MAP = {
+            // 多音字
+            '挑战': 'tiǎo zhàn', '挑选': 'tiāo xuǎn',
+            '似的': 'shì de', '似乎': 'sì hū',
+            '相片': 'xiàng piàn', '互相': 'hù xiāng',
+            '假装': 'jiǎ zhuāng', '放假': 'fàng jià',
+            '朝向': 'cháo xiàng', '朝阳': 'zhāo yáng',
+            '盛开': 'shèng kāi', '盛饭': 'chéng fàn',
+            '晃眼': 'huǎng yǎn', '摇晃': 'huàng',
+            '好奇': 'hào qí', '良好': 'liáng hǎo',
+            '发觉': 'fā jué', '睡觉': 'shuì jiào',
+            '教书': 'jiāo shū', '教室': 'jiào shì',
+            '答应': 'dā ying', '回答': 'huí dá',
+            '处理': 'chǔ lǐ', '到处': 'dào chù',
+            '几乎': 'jī hū', '几个': 'jǐ gè',
+            '骨碌': 'gū lu', '骨头': 'gǔ tou',
+            '根据': 'gēn jù', '据说': 'jù shuō',
+            '看守': 'kān shǒu', '看见': 'kàn jiàn',
+            '不禁': 'bù jīn', '禁止': 'jìn zhǐ',
+            '撒网': 'sā wǎng', '撒种': 'sǎ zhǒng',
+            '挣扎': 'zhēng zhá', '扎实': 'zhā shi',
+            '称重': 'chēng zhòng', '称呼': 'chēng hu',
+            '抹布': 'mā bù', '涂抹': 'tú mǒ',
+            '沙啦': 'shā lā',
+            '划船': 'huá chuán', '计划': 'jì huà',
+            '粘贴': 'zhān tiē',
+            // 二年级上册多音字
+            '给予': 'jǐ yǔ', '送给': 'sòng gěi',
+            '更加': 'gèng jiā', '更换': 'gēng huàn',
+            '尽力': 'jìn lì', '尽管': 'jǐn guǎn',
+            '难过': 'nán guò', '困难': 'kùn nan',
+            '散步': 'sàn bù', '分散': 'fēn sàn',
+            '担心': 'dān xīn', '扁担': 'biǎn dan',
+            '得到': 'dé dào', '觉得': 'jué de', '得意': 'dé yì',
+            '发现': 'fā xiàn', '头发': 'tóu fa',
+            '哄骗': 'hǒng piàn', '起哄': 'qǐ hòng',
+            '将来': 'jiāng lái', '大将': 'dà jiàng',
+            '降落': 'jiàng luò', '投降': 'tóu xiáng',
+            '折纸': 'zhé zhǐ', '折腾': 'zhē teng',
+            '张开': 'zhāng kāi', '夸张': 'kuā zhāng',
+            '着急': 'zháo jí', '穿着': 'chuān zhe',
+            '广场': 'guǎng chǎng', '场合': 'chǎng hé',
+            '似乎': 'sì hū', '好似': 'hǎo sì',
+
+            // 一年级上册词汇拼音
+            '一个': 'yī gè', '二月': 'èr yuè', '三天': 'sān tiān', '上山': 'shàng shān',
+            '人口': 'rén kǒu', '耳目': 'ěr mù', '耳朵': 'ěr duo', '小手': 'xiǎo shǒu',
+            '日子': 'rì zi', '田地': 'tián dì', '禾苗': 'hé miáo', '大火': 'dà huǒ',
+            '虫子': 'chóng zi', '白云': 'bái yún', '大山': 'dà shān',
+            '六个': 'liù gè', '七天': 'qī tiān', '八月': 'bā yuè', '九只': 'jiǔ zhī', '十年': 'shí nián',
+            '秋天': 'qiū tiān', '气球': 'qì qiú', '大雨': 'dà yǔ', '天地': 'tiān dì', '广大': 'guǎng dà',
+            '四方': 'sì fāng', '上下': 'shàng xià', '左右': 'zuǒ yòu', '男女': 'nán nǚ',
+            '比赛': 'bǐ sài', '牙齿': 'yá chǐ', '齿轮': 'chǐ lún', '尾巴': 'wěi ba',
+            '竹子': 'zhú zi', '牛羊': 'niú yáng', '小鸟': 'xiǎo niǎo', '小果': 'xiǎo guǒ',
+            '可爱': 'kě ài', '爱人': 'ài rén', '采花': 'cǎi huā', '采集': 'cǎi jí', '香味': 'xiāng wèi',
+            '远方': 'yuǎn fāng', '颜色': 'yán sè', '近处': 'jìn chù', '听见': 'tīng jiàn', '无声': 'wú shēng',
+            '声音': 'shēng yīn', '晚霞': 'wǎn xiá', '来去': 'lái qù',
+            '男人': 'nán rén', '开门': 'kāi mén', '月亮': 'yuè liang', '入口': 'rù kǒu',
+            '木头': 'mù tou', '大力': 'dà lì', '明天': 'míng tiān', '尘土': 'chén tǔ',
+            '出入': 'chū rù', '立正': 'lì zhèng', '水果': 'shuǐ guǒ', '飞走': 'fēi zǒu',
+            '长大': 'zhǎng dà', '快乐': 'kuài lè', '老师': 'lǎo shī', '明白': 'míng bai',
+            '一天天': 'yī tiān tiān', '样子': 'yàng zi',
+            '好的': 'hǎo de', '有的': 'yǒu de',
+            '问好': 'wèn hǎo', '问答': 'wèn dá', '多少': 'duō shǎo', '地方': 'dì fang',
+            '你们': 'nǐ men', '天才': 'tiān cái', '不才': 'bù cái',
+            '下棋': 'xià qí', '鸡蛋': 'jī dàn',
+
+            // 二年级上册词汇拼音
+            '找到': 'zhǎo dào', '两个': 'liǎng gè', '哪里': 'nǎ lǐ', '宽大': 'kuān dà',
+            '头顶': 'tóu dǐng', '眼睛': 'yǎn jing', '肚子': 'dù zi', '皮肤': 'pí fū', '跳跃': 'tiào yuè',
+            '变化': 'biàn huà', '极端': 'jí duān', '傍晚': 'bàng wǎn', '大海': 'dà hǎi',
+            '海洋': 'hǎi yáng', '作业': 'zuò yè', '坏人': 'huài rén', '给予': 'jǐ yǔ', '带来': 'dài lái',
+            '办法': 'bàn fǎ', '如果': 'rú guǒ', '已经': 'yǐ jīng', '经过': 'jīng guò',
+            '它们': 'tā men', '娃娃': 'wá wa', '毛发': 'máo fà', '更加': 'gèng jiā',
+            '知道': 'zhī dào', '认识': 'rèn shi',
+            '到处': 'dào chù', '花园': 'huā yuán', '小桥': 'xiǎo qiáo', '群众': 'qún zhòng',
+            '队伍': 'duì wǔ', '国旗': 'guó qí', '铜牌': 'tóng pái', '号码': 'hào mǎ',
+            '领导': 'lǐng dǎo', '毛巾': 'máo jīn',
+            '杨树': 'yáng shù', '强壮': 'qiáng zhuàng', '梧桐': 'wú tóng', '枫叶': 'fēng yè',
+            '松树': 'sōng shù', '柏树': 'bǎi shù', '棉花': 'mián hua', '杉树': 'shān shù',
+            '变化': 'biàn huà', '桂花': 'guì huā',
+            '唱歌': 'chàng gē', '写字': 'xiě zì', '草丛': 'cǎo cóng', '深浅': 'shēn qiǎn',
+            '六个': 'liù gè', '熊猫': 'xióng māo', '小猫': 'xiǎo māo', '九个': 'jiǔ gè',
+            '朋友': 'péng you', '友好': 'yǒu hǎo',
+            '季节': 'jì jié', '吹风': 'chuī fēng', '肥胖': 'féi pàng', '农民': 'nóng mín',
+            '事情': 'shì qing', '忙碌': 'máng lù', '归来': 'guī lái', '穿戴': 'chuān dài',
+            '辛苦': 'xīn kǔ', '苦难': 'kǔ nàn',
+            '称呼': 'chēng hu', '柱子': 'zhù zi', '底下': 'dǐ xia', '旗杆': 'qí gān',
+            '秤杆': 'chèng gǎn', '做事': 'zuò shì', '岁月': 'suì yuè', '站立': 'zhàn lì',
+            '小船': 'xiǎo chuán', '然后': 'rán hòu',
+            '画画': 'huà huà', '一幅': 'yī fú', '评价': 'píng jià', '奖励': 'jiǎng lì',
+            '白纸': 'bái zhǐ', '报纸': 'bào zhǐ', '另外': 'lìng wài', '及时': 'jí shí',
+            '拿起': 'ná qǐ', '并且': 'bìng qiě',
+            '封闭': 'fēng bì', '信封': 'xìn fēng', '一支': 'yī zhī', '圆形': 'yuán xíng',
+            '珠子': 'zhū zi', '铅笔': 'qiān bǐ', '电灯': 'diàn dēng', '句子': 'jù zi',
+            '电话': 'diàn huà', '电影': 'diàn yǐng',
+            '哄骗': 'hǒng piàn', '先生': 'xiān shēng', '关闭': 'guān bì', '脸面': 'liǎn miàn',
+            '沉重': 'chén zhòng', '发现': 'fā xiàn', '窗户': 'chuāng hu', '沙子': 'shā zi',
+            '依靠': 'yī kào', '尽力': 'jìn lì', '黄色': 'huáng sè', '楼层': 'lóu céng',
+            '照顾': 'zhào gù', '火炉': 'huǒ lú', '烟雾': 'yān wù', '挂起': 'guà qǐ',
+            '山川': 'shān chuān', '直接': 'zhí jiē',
+            '南方': 'nán fāng', '部分': 'bù fen', '一些': 'yī xiē', '巨大': 'jù dà',
+            '真实': 'zhēn shí', '位置': 'wèi zhì', '每天': 'měi tiān', '升起': 'shēng qǐ',
+            '闪光': 'shǎn guāng', '小狗': 'xiǎo gǒu',
+            '海湾': 'hǎi wān', '名字': 'míng zi', '胜利': 'shèng lì', '痕迹': 'hén jì',
+            '中央': 'zhōng yāng', '美丽': 'měi lì', '展开': 'zhǎn kāi', '现在': 'xiàn zài',
+            '生产': 'shēng chǎn', '一份': 'yī fèn', '披着': 'pī zhe', '树枝': 'shù zhī',
+            '客人': 'kè rén', '老人': 'lǎo rén', '收拾': 'shōu shi', '城市': 'chéng shì',
+            '市场': 'shì chǎng',
+            '水井': 'shuǐ jǐng', '观看': 'guān kàn', '沿着': 'yán zhe', '回答': 'huí dá',
+            '口渴': 'kǒu kě', '喝水': 'hē shuǐ', '说话': 'shuō huà', '国际': 'guó jì',
+            '脚步': 'jiǎo bù', '道路': 'dào lù', '一阵': 'yī zhèn', '晴朗': 'qíng lǎng',
+            '枯萎': 'kū wěi', '却是': 'què shì', '第一': 'dì yī', '将来': 'jiāng lái',
+            '难过': 'nán guò', '纷纷': 'fēn fēn',
+            '一棵': 'yī kē', '谢谢': 'xiè xie', '一次': 'yī cì', '想念': 'xiǎng niàn',
+            '盯着': 'dīng zhe', '发言': 'fā yán', '呢喃': 'ní nán', '邻居': 'lín jū',
+            '治疗': 'zhì liáo', '奇怪': 'qí guài',
+            '楼房': 'lóu fáng', '年代': 'nián dài', '夜晚': 'yè wǎn', '轻松': 'qīng sōng', '利益': 'lì yì',
+            '扁豆': 'biǎn dòu', '担心': 'dān xīn', '志气': 'zhì qì', '老师': 'lǎo shī',
+            '军队': 'jūn duì', '战斗': 'zhàn dòu', '战士': 'zhàn shì',
+            '忘记': 'wàng jì', '活泼': 'huó po', '温度': 'wēn dù', '龙王': 'lóng wáng',
+            '大炮': 'dà pào', '穿上': 'chuān shàng', '开始': 'kāi shǐ', '命令': 'mìng lìng',
+            '刘海': 'liú hǎi', '胡说': 'hú shuō', '兰花': 'lán huā', '反对': 'fǎn duì',
+            '衬衫': 'chèn shān', '被子': 'bèi zi', '关闭': 'guān bì',
+            '危险': 'wēi xiǎn', '勇敢': 'yǒng gǎn', '惊讶': 'jīng yà', '阴天': 'yīn tiān',
+            '似乎': 'sì hū', '野外': 'yě wài', '苍白': 'cāng bái', '茫然': 'máng rán',
+            '孩子': 'hái zi', '于是': 'yú shì', '讨论': 'tǎo lùn', '河岸': 'hé àn',
+            '房屋': 'fáng wū', '一切': 'yī qiè', '长久': 'cháng jiǔ', '散步': 'sàn bù', '步行': 'bù xíng',
+            '唱歌': 'chàng gē', '赶快': 'gǎn kuài', '兴旺': 'xīng wàng', '旁边': 'páng biān',
+            '浑身': 'hún shēn', '时候': 'shí hou', '谁的': 'shéi de', '汽车': 'qì chē',
+            '食物': 'shí wù', '物品': 'wù pǐn', '爷爷': 'yé ye', '就是': 'jiù shì',
+            '爪子': 'zhuǎ zi', '神奇': 'shén qí', '生活': 'shēng huó', '小猪': 'xiǎo zhū',
+            '折纸': 'zhé zhǐ', '张开': 'zhāng kāi', '祝福': 'zhù fú', '扎实': 'zhā shi',
+            '抓住': 'zhuā zhù', '吵闹': 'chǎo nào', '但是': 'dàn shì', '哭泣': 'kū qì',
+            '得到': 'dé dào', '秧苗': 'yāng miáo', '禾苗': 'hé miáo', '汗水': 'hàn shuǐ',
+            '着急': 'zháo jí', '广场': 'guǎng chǎng', '受伤': 'shòu shāng', '道路': 'dào lù',
+
+            // 一年级上册基础词语拼音
+            '一只': 'yī zhī', '上学': 'shàng xué', '上来': 'shàng lái', '上衣': 'shàng yī',
+            '下去': 'xià qù', '下来': 'xià lái', '下雨': 'xià yǔ', '不好': 'bù hǎo',
+            '不对': 'bú duì', '东西': 'dōng xi', '个人': 'gè rén', '书本': 'shū běn',
+            '五个': 'wǔ gè', '从来': 'cóng lái', '你好': 'nǐ hǎo', '儿子': 'ér zi',
+            '全家': 'quán jiā', '八个': 'bā gè', '出门': 'chū mén', '十天': 'shí tiān',
+            '半天': 'bàn tiān', '厂家': 'chǎng jiā', '又来': 'yòu lái', '可是': 'kě shì',
+            '同学': 'tóng xué', '后天': 'hòu tiān', '和气': 'hé qi', '四天': 'sì tiān',
+            '回家': 'huí jiā', '土里': 'tǔ lǐ', '大人': 'dà rén', '大哥': 'dà gē',
+            '大小': 'dà xiǎo', '大门': 'dà mén', '女儿': 'nǚ ér', '好人': 'hǎo rén',
+            '妈妈': 'mā ma', '对比': 'duì bǐ', '小刀': 'xiǎo dāo', '小马': 'xiǎo mǎ',
+            '尺子': 'chǐ zi', '工厂': 'gōng chǎng', '开心': 'kāi xīn', '我们': 'wǒ men',
+            '把手': 'bǎ shǒu', '早上': 'zǎo shàng', '是的': 'shì de', '月牙': 'yuè yá',
+            '本来': 'běn lái', '来了': 'lái le', '树林': 'shù lín', '正在': 'zhèng zài',
+            '水牛': 'shuǐ niú', '用力': 'yòng lì', '白天': 'bái tiān', '知己': 'zhī jǐ',
+            '石头': 'shí tou', '自己': 'zì jǐ', '西方': 'xī fāng', '里面': 'lǐ miàn', '黄牛': 'huáng niú',
+
+            // 一年级下册多音字
+            '种花': 'zhòng huā', '种子': 'zhǒng zi',
+            '音乐': 'yīn yuè', '快乐': 'kuài lè',
+            '行走': 'xíng zǒu', '银行': 'yín háng',
+            '看着': 'kàn zhe', '看见': 'kàn jiàn',
+            '高兴': 'gāo xìng', '兴奋': 'xīng fèn',
+            '还是': 'hái shì', '归还': 'guī huán',
+            '干净': 'gān jìng', '干活': 'gàn huó',
+            '都是': 'dōu shì', '首都': 'shǒu dū',
+
+            // 一年级下册词汇拼音
+            '春天': 'chūn tiān', '冬天': 'dōng tiān', '春风': 'chūn fēng', '下雪': 'xià xuě',
+            '开花': 'kāi huā', '飞鸟': 'fēi niǎo', '进入': 'jìn rù',
+            '姓名': 'xìng míng', '什么': 'shén me', '双手': 'shuāng shǒu',
+            '中国': 'zhōng guó', '国王': 'guó wáng', '方向': 'fāng xiàng',
+            '青草': 'qīng cǎo', '清水': 'qīng shuǐ', '空气': 'kōng qì', '晴天': 'qíng tiān',
+            '心情': 'xīn qíng', '请问': 'qǐng wèn', '生日': 'shēng rì',
+            '写字': 'xiě zì', '左右': 'zuǒ yòu', '右边': 'yòu biān', '红色': 'hóng sè',
+            '时间': 'shí jiān', '运动': 'yùn dòng', '万一': 'wàn yī',
+            '吃饭': 'chī fàn', '叫声': 'jiào shēng', '主人': 'zhǔ rén', '长江': 'cháng jiāng',
+            '住房': 'zhù fáng', '没有': 'méi yǒu', '以后': 'yǐ hòu',
+            '很多': 'hěn duō', '开会': 'kāi huì', '走路': 'zǒu lù', '北方': 'běi fāng',
+            '北京': 'běi jīng', '广大': 'guǎng dà', '公园': 'gōng yuán',
+            '太阳': 'tài yáng', '阳光': 'yáng guāng', '学校': 'xué xiào', '金色': 'jīn sè',
+            '秋天': 'qiū tiān', '因为': 'yīn wèi', '为了': 'wèi le',
+            '他们': 'tā men', '土地': 'tǔ dì', '小河': 'xiǎo hé', '说话': 'shuō huà',
+            '也是': 'yě shì', '听见': 'tīng jiàn', '哥哥': 'gē ge',
+            '单独': 'dān dú', '种花': 'zhòng huā', '居住': 'jū zhù', '招手': 'zhāo shǒu',
+            '呼叫': 'hū jiào', '快乐': 'kuài lè', '音乐': 'yīn yuè',
+            '玩耍': 'wán shuǎ', '很好': 'hěn hǎo', '当时': 'dāng shí', '声音': 'shēng yīn',
+            '讲话': 'jiǎng huà', '行走': 'xíng zǒu', '许多': 'xǔ duō',
+            '思念': 'sī niàn', '床上': 'chuáng shàng', '前后': 'qián hòu', '阳光': 'yáng guāng',
+            '高低': 'gāo dī', '故事': 'gù shì', '家乡': 'jiā xiāng',
+            '颜色': 'yán sè', '外面': 'wài miàn', '看见': 'kàn jiàn', '爸爸': 'bà ba',
+            '晚上': 'wǎn shàng', '微笑': 'wēi xiào', '再见': 'zài jiàn',
+            '中午': 'zhōng wǔ', '节日': 'jié rì', '树叶': 'shù yè', '大米': 'dà mǐ',
+            '分开': 'fēn kāi', '一样': 'yī yàng', '豆子': 'dòu zi',
+            '那里': 'nà lǐ', '看着': 'kàn zhe', '到达': 'dào dá', '高大': 'gāo dà',
+            '高兴': 'gāo xìng', '千万': 'qiān wàn', '成功': 'chéng gōng',
+            '中间': 'zhōng jiān', '迷路': 'mí lù', '制造': 'zhì zào', '运动': 'yùn dòng',
+            '水池': 'shuǐ chí', '欢乐': 'huān lè', '上网': 'shàng wǎng',
+            '古代': 'gǔ dài', '凉快': 'liáng kuai', '细心': 'xì xīn', '夕阳': 'xī yáng',
+            '李子': 'lǐ zǐ', '语文': 'yǔ wén', '香味': 'xiāng wèi',
+            '打球': 'dǎ qiú', '拍手': 'pāi shǒu', '跑步': 'pǎo bù', '足球': 'zú qiú',
+            '声音': 'shēng yīn', '身体': 'shēn tǐ', '体育': 'tǐ yù',
+            '之后': 'zhī hòu', '相信': 'xiāng xìn', '附近': 'fù jìn', '学习': 'xué xí',
+            '远方': 'yuǎn fāng', '玉石': 'yù shí', '意义': 'yì yì',
+            '首先': 'shǒu xiān', '采花': 'cǎi huā', '无法': 'wú fǎ', '大树': 'dà shù',
+            '爱心': 'ài xīn', '尖锐': 'jiān ruì', '角落': 'jiǎo luò',
+            '明亮': 'míng liàng', '飞机': 'fēi jī', '台风': 'tái fēng', '放学': 'fàng xué',
+            '小鱼': 'xiǎo yú', '花朵': 'huā duǒ', '美丽': 'měi lì',
+            '经过': 'jīng guò', '这里': 'zhè lǐ', '好呀': 'hǎo ya', '旁边': 'páng biān',
+            '好吗': 'hǎo ma', '好吧': 'hǎo ba', '加油': 'jiā yóu',
+            '语文': 'yǔ wén', '平安': 'píng ān', '办法': 'bàn fǎ', '让开': 'ràng kāi',
+            '书包': 'shū bāo', '伙伴': 'huǒ bàn', '陪伴': 'péi bàn',
+            '时钟': 'shí zhōng', '丁当': 'dīng dāng', '元旦': 'yuán dàn', '面条': 'miàn tiáo',
+            '小羊': 'xiǎo yáng', '共同': 'gòng tóng', '坐下': 'zuò xià',
+            '重要': 'zhòng yào', '连接': 'lián jiē', '百年': 'bǎi nián', '今天': 'jīn tiān',
+            '还是': 'hái shì', '舌头': 'shé tou', '一点': 'yī diǎn',
+            '一块': 'yī kuài', '非常': 'fēi cháng', '经常': 'jīng cháng', '往前': 'wǎng qián',
+            '一片': 'yī piàn', '西瓜': 'xī guā', '进去': 'jìn qù', '天空': 'tiān kōng',
+            '生病': 'shēng bìng', '她们': 'tā men', '医生': 'yī shēng', '别人': 'bié rén',
+            '干净': 'gān jìng', '奇怪': 'qí guài', '七天': 'qī tiān', '星星': 'xīng xing',
+            '吓人': 'xià rén', '害怕': 'hài pà', '跟着': 'gēn zhe', '起来': 'qǐ lái',
+            '家人': 'jiā rén', '山羊': 'shān yáng', '大象': 'dà xiàng', '都是': 'dōu shì',
+            '捉虫': 'zhuō chóng', '条件': 'tiáo jiàn', '方向': 'fāng xiàng', '爬山': 'pá shān',
+            '姐姐': 'jiě jie', '您好': 'nín hǎo', '小草': 'xiǎo cǎo', '房子': 'fáng zi',
+
+            // 二年级下册多音字
+            '背后': 'bèi hòu', '背书': 'bēi shū',
+            '转动': 'zhuàn dòng', '转身': 'zhuǎn shēn',
+            '方便': 'fāng biàn', '便宜': 'pián yi',
+            '教书': 'jiāo shū', '教室': 'jiào shì',
+            '倒下': 'dǎo xià', '倒水': 'dào shuǐ',
+            '应该': 'yīng gāi', '答应': 'dā ying',
+
+            // 二年级下册词汇拼音
+            '古诗': 'gǔ shī', '儿童': 'ér tóng', '趁早': 'chèn zǎo', '碧绿': 'bì lǜ',
+            '化妆': 'huà zhuāng', '绿色': 'lǜ sè', '丝绸': 'sī chóu', '剪刀': 'jiǎn dāo',
+            '冲水': 'chōng shuǐ', '寻找': 'xún zhǎo', '姑娘': 'gū niang', '新娘': 'xīn niáng',
+            '吐出': 'tǔ chū', '柳树': 'liǔ shù', '荡漾': 'dàng yàng', '桃花': 'táo huā', '杏花': 'xìng huā',
+            '鲜花': 'xiān huā', '邮局': 'yóu jú', '传递': 'chuán dì', '人员': 'rén yuán',
+            '原来': 'yuán lái', '叔叔': 'shū shu', '局长': 'jú zhǎng', '一堆': 'yī duī',
+            '认识': 'rèn shi', '礼物': 'lǐ wù',
+            '邓小平': 'dèng xiǎo píng', '植物': 'zhí wù', '格外': 'gé wài', '引导': 'yǐn dǎo',
+            '注意': 'zhù yì', '满意': 'mǎn yì', '休息': 'xiū xi', '消息': 'xiāo xi',
+            '雷锋': 'léi fēng', '昨天': 'zuó tiān', '留下': 'liú xià', '弯曲': 'wān qū',
+            '背后': 'bèi hòu', '洒水': 'sǎ shuǐ', '温暖': 'wēn nuǎn',
+            '能力': 'néng lì', '桌子': 'zhuō zi', '味道': 'wèi dào', '买卖': 'mǎi mai',
+            '玩具': 'wán jù', '甘甜': 'gān tián', '甜蜜': 'tián mì', '青菜': 'qīng cài', '劳动': 'láo dòng',
+            '一匹': 'yī pǐ', '妹妹': 'mèi mei', '波浪': 'bō làng', '花纹': 'huā wén',
+            '好像': 'hǎo xiàng', '风景': 'fēng jǐng', '恋爱': 'liàn ài', '舍不得': 'shě bu de', '要求': 'yāo qiú',
+            '广州': 'guǎng zhōu', '中华': 'zhōng huá', '海岛': 'hǎi dǎo', '各地': 'gè dì',
+            '人民': 'rén mín', '民族': 'mín zú', '友谊': 'yǒu yì', '整齐': 'zhěng qí', '兴奋': 'xīng fèn',
+            '粘贴': 'zhān tiē', '街道': 'jiē dào', '小舟': 'xiǎo zhōu', '艾草': 'ài cǎo',
+            '尊敬': 'zūn jìng', '转动': 'zhuàn dòng', '团结': 'tuán jié', '热情': 'rè qíng', '热闹': 'rè nao',
+            '宝贝': 'bǎo bèi', '贝壳': 'bèi ké', '甲虫': 'jiǎ chóng', '骨头': 'gǔ tou',
+            '金钱': 'jīn qián', '硬币': 'yìng bì', '与众不同': 'yǔ zhòng bù tóng', '财富': 'cái fù', '购买': 'gòu mǎi',
+            '烧烤': 'shāo kǎo', '茄子': 'qié zi', '烤肉': 'kǎo ròu', '鸭子': 'yā zi',
+            '牛肉': 'niú ròu', '小鸡': 'xiǎo jī', '鸡蛋': 'jī dàn', '炒菜': 'chǎo cài', '米饭': 'mǐ fàn',
+            '彩色': 'cǎi sè', '做梦': 'zuò mèng', '森林': 'sēn lín', '拉手': 'lā shǒu',
+            '结束': 'jié shù', '苹果': 'píng guǒ', '一般': 'yī bān', '精神': 'jīng shén', '灵活': 'líng huó',
+            '雨伞': 'yǔ sǎn', '阿姨': 'ā yí', '弟弟': 'dì di', '方便': 'fāng biàn',
+            '教书': 'jiāo shū', '游戏': 'yóu xì', '演戏': 'yǎn xì', '母亲': 'mǔ qīn',
+            '周围': 'zhōu wéi', '四周': 'sì zhōu', '补充': 'bǔ chōng', '充满': 'chōng mǎn',
+            '吃药': 'chī yào', '合作': 'hé zuò', '死亡': 'sǐ wáng', '记住': 'jì zhù',
+            '放屁': 'fàng pì', '股票': 'gǔ piào', '干净': 'gān jìng', '总是': 'zǒng shì',
+            '辛苦': 'xīn kǔ', '婶婶': 'shěn shen', '使用': 'shǐ yòng', '使劲': 'shǐ jìn',
+            '死亡': 'sǐ wáng', '牢记': 'láo jì', '钻研': 'zuān yán', '劝告': 'quàn gào',
+            '丢失': 'diū shī', '告诉': 'gào su', '筋骨': 'jīn gǔ', '疲劳': 'pí láo',
+            '图画': 'tú huà', '课堂': 'kè táng', '摆放': 'bǎi fàng', '座位': 'zuò wèi',
+            '教室': 'jiào shì', '交流': 'jiāo liú', '哈哈': 'hā hā', '页面': 'yè miàn',
+            '抢夺': 'qiǎng duó', '嘻嘻': 'xī xī',
+            '愿意': 'yuàn yì', '心意': 'xīn yì', '小麦': 'xiǎo mài', '应该': 'yīng gāi',
+            '伯父': 'bó fù', '时刻': 'shí kè', '突然': 'tū rán', '摔倒': 'shuāi dǎo',
+            '湖水': 'hú shuǐ', '莲花': 'lián huā', '穷人': 'qióng rén', '荷花': 'hé huā',
+            '绝对': 'jué duì', '包含': 'bāo hán', '山岭': 'shān lǐng', '吴国': 'wú guó',
+            '雷声': 'léi shēng', '乌云': 'wū yún', '黑色': 'hēi sè', '压力': 'yā lì',
+            '低垂': 'dī chuí', '窗户': 'chuāng hu', '新年': 'xīn nián', '欢迎': 'huān yíng', '扑向': 'pū xiàng',
+            '手指': 'shǒu zhǐ', '针线': 'zhēn xiàn', '帮助': 'bāng zhù', '指导': 'zhǐ dǎo',
+            '永远': 'yǒng yuǎn', '碰到': 'pèng dào', '特别': 'tè bié', '积累': 'jī lěi',
+            '杯子': 'bēi zi', '失去': 'shī qù', '洗手': 'xǐ shǒu', '洗澡': 'xǐ zǎo',
+            '容易': 'róng yì', '沐浴': 'mù yù', '水桶': 'shuǐ tǒng',
+            '扇子': 'shàn zi', '慢慢': 'màn màn', '遇见': 'yù jiàn', '兔子': 'tù zi',
+            '安全': 'ān quán', '根本': 'gēn běn', '疼痛': 'téng tòng', '最好': 'zuì hǎo',
+            '商店': 'shāng diàn', '决定': 'jué dìng', '商人': 'shāng rén',
+            '大夫': 'dài fu', '终于': 'zhōng yú', '完成': 'wán chéng', '交换': 'jiāo huàn', '日期': 'rì qī',
+            '青蛙': 'qīng wā', '买卖': 'mǎi mai', '搬家': 'bān jiā', '倒下': 'dǎo xià',
+            '种籽': 'zhǒng zǐ', '泉水': 'quán shuǐ', '破坏': 'pò huài', '应该': 'yīng gāi',
+            '整理': 'zhěng lǐ', '抽水': 'chōu shuǐ', '纺织': 'fǎng zhī', '编织': 'biān zhī',
+            '编辑': 'biān jí', '怎么': 'zěn me', '布料': 'bù liào', '消失': 'xiāo shī',
+            '祖国': 'zǔ guó', '好啊': 'hǎo a', '浓郁': 'nóng yù', '希望': 'xī wàng',
+            '蓝色': 'lán sè', '采摘': 'cǎi zhāi', '掏出': 'tāo chū', '比赛': 'bǐ sài', '回忆': 'huí yì',
+            '感觉': 'gǎn jué', '价值': 'jià zhí', '人类': 'rén lèi', '艰难': 'jiān nán',
+            '弓箭': 'gōng jiàn', '炎热': 'yán rè', '害怕': 'hài pà', '此刻': 'cǐ kè',
+            '皇帝': 'huáng dì', '传说': 'chuán shuō', '忽然': 'hū rán', '启发': 'qǐ fā',
+            '由于': 'yóu yú', '道理': 'dào lǐ', '一段': 'yī duàn', '通过': 'tōng guò',
+
+            // 三年级上册词汇拼音
+            '山坡': 'shān pō', '足球': 'zú qiú', '招手': 'zhāo shǒu', '呼吸': 'hū xī',
+            '飘扬': 'piāo yáng', '飞扬': 'fēi yáng', '朗读': 'lǎng dú', '热闹': 'rè nao',
+            '吵闹': 'chǎo nào', '粗壮': 'cū zhuàng', '强壮': 'qiáng zhuàng', '洁白': 'jié bái',
+            '轰隆隆': 'hōng lóng lóng', '湿润': 'shī rùn', '滋润': 'zī rùn', '口笛': 'kǒu dí',
+            '狂风': 'kuáng fēng', '功课': 'gōng kè', '惩罚': 'chéng fá', '互相': 'hù xiāng',
+            '碰触': 'pèng chù', '金黄': 'jīn huáng', '着急': 'zháo jí',
+            '家庭': 'jiā tíng', '未来': 'wèi lái', '寒冷': 'hán lěng',
+            '小径': 'xiǎo jìng', '倾斜': 'qīng xié', '枫叶': 'fēng yè', '风霜': 'fēng shuāng',
+            '挑战': 'tiǎo zhàn', '深浅': 'shēn qiǎn', '落叶': 'luò yè',
+            '晴朗': 'qíng lǎng', '亮晶晶': 'liàng jīng jīng', '露珠': 'lù zhū', '粘贴': 'zhān tiē',
+            '脚印': 'jiǎo yìn', '图案': 'tú àn', '展开': 'zhǎn kāi', '排列': 'pái liè',
+            '规则': 'guī zé', '原则': 'yuán zé', '凌乱': 'líng luàn', '杂乱': 'zá luàn',
+            '清凉': 'qīng liáng', '杏叶': 'xìng yè', '一枚': 'yī méi', '邮票': 'yóu piào',
+            '车票': 'chē piào', '凉爽': 'liáng shuǎng', '拥挤': 'yōng jǐ', '争取': 'zhēng qǔ',
+            '菊花': 'jú huā', '频繁': 'pín fán', '勾住': 'gōu zhù', '挖掘': 'wā jué', '石油': 'shí yóu',
+            '房屋': 'fáng wū', '地板': 'dì bǎn', '准备': 'zhǔn bèi', '预备': 'yù bèi',
+            '等待': 'děng dài', '暴雨': 'bào yǔ', '钻洞': 'zuān dòng',
+            '爬行': 'pá xíng', '漂亮': 'piào liang', '晒太阳': 'shài tài yáng',
+            '胡萝卜': 'hú luó bo', '葫芦': 'hú lu', '不错': 'bú cuò', '普通': 'pǔ tōng',
+            '皇宫': 'huáng gōng', '肯定': 'kěn dìng', '假冒': 'jiǎ mào', '形式': 'xíng shì', '可怜': 'kě lián',
+            '旅行': 'lǚ xíng', '另外': 'lìng wài', '及时': 'jí shí',
+            '试卷': 'shì juàn', '救命': 'jiù mìng', '生命': 'shēng mìng', '尾巴': 'wěi ba',
+            '牙齿': 'yá chǐ', '胃口': 'wèi kǒu', '管理': 'guǎn lǐ', '刚才': 'gāng cái', '咬人': 'yǎo rén',
+            '申请': 'shēn qǐng', '介绍': 'jiè shào', '宗旨': 'zōng zhǐ', '占领': 'zhàn lǐng', '之前': 'zhī qián',
+            '搭船': 'dā chuán', '母亲': 'mǔ qīn', '祖父': 'zǔ fù', '父亲': 'fù qīn',
+            '沙子': 'shā zi', '沙啦': 'shā lā', '响声': 'xiǎng shēng', '羽毛': 'yǔ máo',
+            '翠绿': 'cuì lǜ', '嘴巴': 'zuǐ ba', '静悄悄': 'jìng qiāo qiāo', '吞下': 'tūn xià', '捕鱼': 'bǔ yú',
+            '蒲公英': 'pú gōng yīng', '英雄': 'yīng xióng', '盛开': 'shèng kāi', '玩耍': 'wán shuǎ',
+            '使劲': 'shǐ jìn', '笑脸': 'xiào liǎn', '哈欠': 'hā qian', '朝向': 'cháo xiàng',
+            '钓鱼': 'diào yú', '观察': 'guān chá', '合拢': 'hé lǒng', '喜爱': 'xǐ ài',
+            '风景': 'fēng jǐng', '优美': 'yōu měi', '淡青': 'dàn qīng', '浅绿': 'qiǎn lǜ',
+            '海底': 'hǎi dǐ', '岩石': 'yán shí', '长颈鹿': 'cháng jǐng lù', '划船': 'huá chuán',
+            '布满': 'bù mǎn', '茂密': 'mào mì', '密林': 'mì lín', '深厚': 'shēn hòu', '肥料': 'féi liào',
+            '海滨': 'hǎi bīn', '棕色': 'zōng sè', '帆船': 'fān chuán', '灰色': 'huī sè',
+            '跟前': 'gēn qián', '渔民': 'yú mín', '贝壳': 'bèi ké', '庭院': 'tíng yuàn',
+            '亚热带': 'yà rè dài', '透明': 'tòu míng', '除了': 'chú le', '踩踏': 'cǎi tà',
+            '抽出': 'chōu chū', '封闭': 'fēng bì', '严实': 'yán shi', '挡住': 'dǎng zhù',
+            '花坛': 'huā tán', '显得': 'xiǎn de', '苍翠': 'cāng cuì', '药材': 'yào cái',
+            '木材': 'mù cái', '松软': 'sōng ruǎn', '刮风': 'guā fēng', '捕捉': 'bǔ zhuō',
+            '返回': 'fǎn huí', '看望': 'kàn wàng', '打断': 'dǎ duàn', '清楚': 'qīng chu',
+            '至今': 'zhì jīn', '河岸': 'hé àn', '孤单': 'gū dān', '饮料': 'yǐn liào',
+            '人云亦云': 'rén yún yì yún', '欲望': 'yù wàng', '抹布': 'mā bù', '适宜': 'shì yí',
+            '美妙': 'měi miào', '演奏': 'yǎn zòu', '钢琴': 'gāng qín', '温柔': 'wēn róu',
+            '感受': 'gǎn shòu', '充满': 'chōng mǎn', '威力': 'wēi lì', '乐器': 'yuè qì',
+            '汇聚': 'huì jù', '鸣叫': 'míng jiào', '池塘': 'chí táng',
+            '龙虾': 'lóng xiā', '昆虫': 'kūn chóng', '不仅': 'bù jǐn', '顺序': 'shùn xù',
+            '光荣': 'guāng róng', '枯萎': 'kū wěi', '姿态': 'zī tài', '态度': 'tài du',
+            '刺猬': 'cì wei', '梨树': 'lí shù', '部分': 'bù fen', '深奥': 'shēn ào', '秘密': 'mì mì',
+            '螺丝': 'luó sī', '螺蛳': 'luó sī', '螃蟹': 'páng xiè', '鲤鱼': 'lǐ yú', '鲫鱼': 'jì yú', '鲨鱼': 'shā yú',
+            '司机': 'sī jī', '登山': 'dēng shān', '跌倒': 'diē dǎo', '皆大欢喜': 'jiē dà huān xǐ',
+            '放弃': 'fàng qì', '坚持': 'jiān chí', '击掌': 'jī zhǎng',
+            '思念': 'sī niàn', '差别': 'chā bié', '考试': 'kǎo shì', '尝试': 'cháng shì',
+            '平均': 'píng jūn', '后退': 'hòu tuì', '努力': 'nǔ lì',
+            '留下': 'liú xià', '温度': 'wēn dù', '兴奋': 'xīng fèn',
+            '木棒': 'mù bàng', '受伤': 'shòu shāng', '陆地': 'lù dì', '流血': 'liú xuè',
+            '取出': 'qǔ chū', '盘子': 'pán zi', '匆忙': 'cōng máng', '医生': 'yī shēng',
+            '迅速': 'xùn sù', '速度': 'sù dù', '夺走': 'duó zǒu', '秒针': 'miǎo zhēn',
+            '睁眼': 'zhēng yǎn', '眨眼': 'zhǎ yǎn', '瞪眼': 'dèng yǎn', '瞅见': 'chǒu jiàn',
+            '发怒': 'fā nù', '眼眶': 'yǎn kuàng', '发呆': 'fā dāi', '目睹': 'mù dǔ',
+
+            // 四年级上册多音字
+            '曾经': 'céng jīng', '曾祖': 'zēng zǔ',
+            '横竖': 'héng shù', '蛮横': 'mán hèng',
+            '降落': 'jiàng luò', '投降': 'tóu xiáng',
+            '累了': 'lèi le', '劳累': 'láo lèi', '积累': 'jī lěi', '累计': 'lěi jì',
+            '奔跑': 'bēn pǎo', '投奔': 'tóu bèn',
+            '重量': 'zhòng liàng', '重叠': 'chóng dié',
+            '塞外': 'sài wài', '堵塞': 'dǔ sè', '塞住': 'sāi zhù',
+            '旋转': 'xuán zhuǎn', '旋风': 'xuàn fēng',
+
+            // 四年级上册词汇拼音
+            '潮水': 'cháo shuǐ', '根据': 'gēn jù', '堤坝': 'dī bà', '宽阔': 'kuān kuò',
+            '盼望': 'pàn wàng', '滚动': 'gǔn dòng', '顿时': 'dùn shí', '逐渐': 'zhú jiàn',
+            '渐渐': 'jiàn jiàn', '堵塞': 'dǔ sè', '犹如': 'yóu rú', '崩塌': 'bēng tā',
+            '震动': 'zhèn dòng', '霎时': 'shà shí', '多余': 'duō yú',
+            '淘气': 'táo qì', '牵挂': 'qiān guà', '白鹅': 'bái é', '鸟卵': 'niǎo luǎn',
+            '坑洼': 'kēng wā', '水洼': 'shuǐ wā', '填满': 'tián mǎn', '庄稼': 'zhuāng jia',
+            '习俗': 'xí sú', '跳跃': 'tiào yuè', '葡萄': 'pú tao', '稻田': 'dào tián', '成熟': 'chéng shú',
+            '疏远': 'shū yuǎn', '按照': 'àn zhào', '舒服': 'shū fu', '适合': 'shì hé',
+            '黑暗': 'hēi àn', '恐怕': 'kǒng pà', '僵硬': 'jiāng yìng', '坚硬': 'jiān yìng',
+            '枪支': 'qiāng zhī', '耐心': 'nài xīn', '探索': 'tàn suǒ', '愉快': 'yú kuài',
+            '曾经': 'céng jīng', '水沟': 'shuǐ gōu', '洋溢': 'yáng yì',
+            '蚂蚁': 'mǎ yǐ', '抛弃': 'pāo qì', '科学': 'kē xué', '横竖': 'héng shù',
+            '竖立': 'shù lì', '绳子': 'shéng zi', '联系': 'lián xì', '姐妹': 'jiě mèi',
+            '证明': 'zhèng míng', '复习': 'fù xí', '研究': 'yán jiū', '到达': 'dào dá',
+            '驾驶': 'jià shǐ', '行驶': 'xíng shǐ',
+            '呼唤': 'hū huàn', '世纪': 'shì jì', '技术': 'jì shù', '改变': 'gǎi biàn',
+            '过程': 'guò chéng', '超过': 'chāo guò', '亿万': 'yì wàn', '核心': 'hé xīn',
+            '奥秘': 'ào mì', '利益': 'lì yì', '联合': 'lián hé', '品质': 'pǐn zhì',
+            '哲学': 'zhé xué', '任务': 'rèn wu', '善良': 'shàn liáng',
+            '暮色': 'mù sè', '吟诵': 'yín sòng', '题目': 'tí mù', '侧面': 'cè miàn',
+            '山峰': 'shān fēng', '庐山': 'lú shān', '缘分': 'yuán fèn', '降落': 'jiàng luò',
+            '费用': 'fèi yòng', '必须': 'bì xū', '谦逊': 'qiān xùn', '输赢': 'shū yíng',
+            '老虎': 'lǎo hǔ', '操场': 'cāo chǎng', '占领': 'zhàn lǐng', '嫩绿': 'nèn lǜ',
+            '顺利': 'shùn lì', '平均': 'píng jūn', '重叠': 'chóng dié', '空隙': 'kòng xì',
+            '茎叶': 'jīng yè', '把柄': 'bǎ bǐng', '枯萎': 'kū wěi', '瞧见': 'qiáo jiàn', '固定': 'gù dìng',
+            '住宅': 'zhù zhái', '临时': 'lín shí', '谨慎': 'jǐn shèn', '选择': 'xuǎn zé',
+            '地址': 'dì zhǐ', '良好': 'liáng hǎo', '洞穴': 'dòng xué', '客厅': 'kè tīng',
+            '卧室': 'wò shì', '专心': 'zhuān xīn', '即刻': 'jí kè', '比较': 'bǐ jiào',
+            '眼眸': 'yǎn móu', '翻开': 'fān kāi', '斧头': 'fǔ tóu', '劈开': 'pī kāi',
+            '缓慢': 'huǎn màn', '浑浊': 'hún zhuó', '丈夫': 'zhàng fu', '支撑': 'zhī chēng',
+            '踢球': 'tī qiú', '劳累': 'láo lèi', '液体': 'yè tǐ', '奔跑': 'bēn pǎo',
+            '茂盛': 'mào shèng', '滋润': 'zī rùn',
+            '子曰': 'zǐ yuē', '溺水': 'nì shuǐ', '返回': 'fǎn huí', '衔接': 'xián jiē',
+            '悲伤': 'bēi shāng', '惨烈': 'cǎn liè', '野兽': 'yě shòu', '佩服': 'pèi fú',
+            '坚持': 'jiān chí', '违反': 'wéi fǎn', '抵抗': 'dǐ kàng', '环境': 'huán jìng',
+            '锁链': 'suǒ liàn', '既然': 'jì rán', '狠心': 'hěn xīn', '著名': 'zhù míng',
+            '愤怒': 'fèn nù', '获得': 'huò dé',
+            '唉声': 'āi shēng', '呆住': 'dāi zhù', '无奈': 'wú nài', '鸟巢': 'niǎo cháo',
+            '牙齿': 'yá chǐ', '身躯': 'shēn qū', '掩护': 'yǎn hù', '幼小': 'yòu xiǎo',
+            '搏斗': 'bó dòu', '庞大': 'páng dà', '重量': 'zhòng liàng', '愣住': 'lèng zhù',
+            '年级': 'nián jí', '链条': 'liàn tiáo', '颤抖': 'chàn dǒu', '攀登': 'pān dēng',
+            '猴子': 'hóu zi', '思念': 'sī niàn', '辨别': 'biàn bié', '呵护': 'hē hù',
+            '抚摸': 'fǔ mō', '坟墓': 'fén mù', '下跪': 'xià guì', '捶打': 'chuí dǎ',
+            '环绕': 'huán rào', '顽皮': 'wán pí', '脖子': 'bó zi', '脱掉': 'tuō diào',
+            '大概': 'dà gài', '惹事': 'rě shì', '昏迷': 'hūn mí', '握手': 'wò shǒu',
+            '摔倒': 'shuāi dǎo', '凭借': 'píng jiè', '掐住': 'qiā zhù',
+            '班级': 'bān jí', '鼓励': 'gǔ lì', '殷切': 'yīn qiè', '俩人': 'liǎ rén',
+            '练习': 'liàn xí', '一套': 'yī tào', '裤子': 'kù zi', '逃跑': 'táo pǎo',
+            '亏损': 'kuī sǔn', '挖掘': 'wā jué', '撤退': 'chè tuì', '课堂': 'kè táng',
+            '砸碎': 'zá suì', '铁锅': 'tiě guō',
+            '是否': 'shì fǒu', '旋转': 'xuán zhuǎn', '情况': 'qíng kuàng', '失败': 'shī bài',
+            '椅子': 'yǐ zi', '尤其': 'yóu qí', '仇恨': 'chóu hèn', '元帅': 'yuán shuài',
+            '预备': 'yù bèi', '溃败': 'kuì bài', '产品': 'chǎn pǐn', '丑陋': 'chǒu lòu', '豪华': 'háo huá',
+            '塞外': 'sài wài', '秦朝': 'qín cháo', '出征': 'chū zhēng', '词语': 'cí yǔ',
+            '催促': 'cuī cù', '陶醉': 'táo zuì', '杰出': 'jié chū', '亦然': 'yì rán',
+            '雄伟': 'xióng wěi', '项目': 'xiàng mù',
+            '严肃': 'yán sù', '沉默': 'chén mò', '晌午': 'shǎng wu', '振作': 'zhèn zuò',
+            '胸怀': 'xiōng huái', '怀念': 'huái niàn', '赞美': 'zàn měi', '效果': 'xiào guǒ',
+            '平凡': 'píng fán', '照顾': 'zhào gù', '训练': 'xùn liàn', '斤两': 'jīn liǎng',
+            '戒备': 'jiè bèi', '尝试': 'cháng shì', '诸位': 'zhū wèi', '竞争': 'jìng zhēng', '唯一': 'wéi yī',
+            '豹子': 'bào zi', '派遣': 'pài qiǎn', '娶亲': 'qǔ qīn', '媳妇': 'xí fu',
+            '妇女': 'fù nǚ', '淹没': 'yān mò', '逼迫': 'bī pò', '漂浮': 'piāo fú',
+            '干旱': 'gān hàn', '徒弟': 'tú dì', '扔掉': 'rēng diào', '饶恕': 'ráo shù',
+            '欺骗': 'qī piàn', '灌溉': 'guàn gài',
+
+            // 三年级下册多音字
+            '仿佛': 'fǎng fú', '佛像': 'fó xiàng',
+            '差别': 'chā bié', '出差': 'chū chāi', '差劲': 'chà jìn',
+            '模仿': 'mó fǎng', '模样': 'mú yàng',
+            '省份': 'shěng fèn', '反省': 'fǎn xǐng',
+            '卷起': 'juǎn qǐ', '试卷': 'shì juàn',
+            '强大': 'qiáng dà', '勉强': 'miǎn qiǎng', '倔强': 'jué jiàng',
+
+            // 三年级下册词汇拼音
+            '融化': 'róng huà', '燕子': 'yàn zi', '鸳鸯': 'yuān yāng', '恩惠': 'ēn huì',
+            '崇拜': 'chóng bài', '芦苇': 'lú wěi', '发芽': 'fā yá', '梅花': 'méi huā',
+            '小溪': 'xiǎo xī', '泛滥': 'fàn làn', '减少': 'jiǎn shǎo',
+            '凑合': 'còu he', '吹拂': 'chuī fú', '集合': 'jí hé', '聚集': 'jù jí', '掠过': 'lüè guò',
+            '形状': 'xíng zhuàng', '掠过': 'lüè guò', '偶然': 'ǒu rán', '偶尔': 'ǒu ěr',
+            '沾水': 'zhān shuǐ', '疲倦': 'pí juàn', '休闲': 'xiū xián', '纤细': 'xiān xì', '痕迹': 'hén jì',
+            '花瓣': 'huā bàn', '蓬松': 'péng sōng', '膨胀': 'péng zhàng', '裂开': 'liè kāi',
+            '姿态': 'zī tài', '气势': 'qì shì', '仿佛': 'fǎng fú', '随便': 'suí biàn',
+            '舞蹈': 'wǔ dǎo', '停止': 'tíng zhǐ',
+            '守护': 'shǒu hù', '株连': 'zhū lián', '等待': 'děng dài', '宋朝': 'sòng cháo',
+            '耕种': 'gēng zhòng', '触摸': 'chù mō', '脖颈': 'bó gěng', '解释': 'jiě shì', '其他': 'qí tā',
+            '骄傲': 'jiāo ào', '谦虚': 'qiān xū', '虚假': 'xū jiǎ', '懦弱': 'nuò ruò',
+            '弱小': 'ruò xiǎo', '提醒': 'tí xǐng', '灰尘': 'huī chén', '讽刺': 'fěng cì',
+            '捧起': 'pěng qǐ', '代替': 'dài tì', '价值': 'jià zhí',
+            '鹿角': 'lù jiǎo', '池塘': 'chí táng', '倒映': 'dào yìng', '欣赏': 'xīn shǎng',
+            '均匀': 'jūn yún', '精致': 'jīng zhì', '搭配': 'dā pèi', '哎呀': 'āi ya',
+            '狮子': 'shī zi', '追赶': 'zhuī gǎn', '叹气': 'tàn qì',
+            '符号': 'fú hào', '欲望': 'yù wàng', '灵魂': 'líng hún', '借用': 'jiè yòng',
+            '喝酒': 'hē jiǔ', '何时': 'hé shí', '放牧': 'fàng mù', '兄弟': 'xiōng dì',
+            '独自': 'dú zì', '奇异': 'qí yì', '佳节': 'jiā jié',
+            '世界': 'shì jiè', '边界': 'biān jiè', '伟大': 'wěi dà', '记录': 'jì lù',
+            '保护': 'bǎo hù', '保存': 'bǎo cún', '约定': 'yuē dìng', '经验': 'jīng yàn',
+            '打捞': 'dǎ lāo', '阿姨': 'ā yí', '欧洲': 'ōu zhōu', '大洲': 'dà zhōu', '社会': 'shè huì',
+            '赵国': 'zhào guó', '省份': 'shěng fèn', '县城': 'xiàn chéng', '工匠': 'gōng jiàng',
+            '设计': 'shè jì', '计划': 'jì huà', '历史': 'lì shǐ', '创造': 'chuàng zào',
+            '举起': 'jǔ qǐ', '而且': 'ér qiě', '智慧': 'zhì huì', '经历': 'jīng lì',
+            '芬芳': 'fēn fāng', '内部': 'nèi bù', '苏醒': 'sū xǐng', '寿命': 'shòu mìng',
+            '强大': 'qiáng dà', '表示': 'biǎo shì', '昆虫': 'kūn chóng', '修改': 'xiū gǎi',
+            '建设': 'jiàn shè', '组织': 'zǔ zhī',
+            '蜂蜜': 'fēng mì', '蜜蜂': 'mì fēng', '辨别': 'biàn bié', '阻止': 'zǔ zhǐ',
+            '跨越': 'kuà yuè', '包括': 'bāo kuò', '检查': 'jiǎn chá', '调查': 'diào chá',
+            '确定': 'què dìng', '错误': 'cuò wù', '旅途': 'lǚ tú', '陌生': 'mò shēng',
+            '宇宙': 'yǔ zhòu', '淹没': 'yān mò', '秘密': 'mì mì', '密封': 'mì fēng',
+            '一栋': 'yī dòng', '楼梯': 'lóu tī', '铃铛': 'líng dang', '乘坐': 'chéng zuò',
+            '情绪': 'qíng xù', '篇章': 'piān zhāng', '超越': 'chāo yuè',
+            '形状': 'xíng zhuàng', '狐狸': 'hú li', '零食': 'líng shí', '巧妙': 'qiǎo miào',
+            '克服': 'kè fú', '香肠': 'xiāng cháng', '继续': 'jì xù', '抬头': 'tái tóu', '烦恼': 'fán nǎo',
+            '墨水': 'mò shuǐ', '染色': 'rǎn sè', '竹竿': 'zhú gān', '腾飞': 'téng fēi',
+            '破碎': 'pò suì', '拨动': 'bō dòng', '浪花': 'làng huā', '葫芦': 'hú lu',
+            '凉爽': 'liáng shuǎng', '蘑菇': 'mó gu',
+            '表示': 'biǎo shì', '胆量': 'dǎn liàng', '夺取': 'duó qǔ', '责骂': 'zé mà',
+            '仇人': 'chóu rén', '差别': 'chā bié', '付钱': 'fù qián', '倍数': 'bèi shù',
+            '虽然': 'suī rán', '方式': 'fāng shì', '魔鬼': 'mó guǐ', '泡沫': 'pào mò', '条件': 'tiáo jiàn',
+            '肥皂': 'féi zào', '剩余': 'shèng yú', '饭碗': 'fàn wǎn', '悠闲': 'yōu xián',
+            '若是': 'ruò shì', '透明': 'tòu míng', '娇嫩': 'jiāo nèn', '拉扯': 'lā chě',
+            '仰望': 'yǎng wàng', '一串': 'yī chuàn', '婴儿': 'yīng ér', '希望': 'xī wàng',
+            '呈现': 'chéng xiàn', '幻想': 'huàn xiǎng', '诱惑': 'yòu huò', '滋润': 'zī rùn',
+            '光芒': 'guāng máng', '飞翔': 'fēi xiáng', '冰块': 'bīng kuài', '宝剑': 'bǎo jiàn',
+            '普通': 'pǔ tōng', '模仿': 'mó fǎng', '类型': 'lèi xíng',
+            '安宁': 'ān níng', '官员': 'guān yuán', '汪洋': 'wāng yáng', '参加': 'cān jiā',
+            '进攻': 'jìn gōng', '推动': 'tuī dòng', '迅速': 'xùn sù', '速度': 'sù dù',
+            '后退': 'hòu tuì', '轮流': 'lún liú', '煤炭': 'méi tàn', '钢铁': 'gāng tiě',
+            '必须': 'bì xū', '灿烂': 'càn làn', '骑马': 'qí mǎ', '秒钟': 'miǎo zhōng',
+            '大腿': 'dà tuǐ', '凶猛': 'xiōng měng', '接受': 'jiē shòu', '庙堂': 'miào táng',
+            '威风': 'wēi fēng', '武功': 'wǔ gōng', '镇压': 'zhèn yā',
+            '性格': 'xìng gé', '卷起': 'juǎn qǐ', '货物': 'huò wù', '计算': 'jì suàn',
+            '夹住': 'jiā zhù', '夸奖': 'kuā jiǎng', '任务': 'rèn wu', '衬衫': 'chèn shān',
+            '负责': 'fù zé', '责任': 'zé rèn', '手艺': 'shǒu yì',
+            '漏水': 'lòu shuǐ', '喂食': 'wèi shí', '肥胖': 'féi pàng', '毛驴': 'máo lǘ',
+            '小偷': 'xiǎo tōu', '恶狼': 'è láng', '莫非': 'mò fēi', '厉害': 'lì hai',
+            '拥抱': 'yōng bào', '架子': 'jià zi', '胶水': 'jiāo shuǐ', '粘贴': 'zhān tiē', '偏心': 'piān xīn',
+        };
+
+        // 课本库
+        const TEXTBOOK_LIBRARY = {
+            // 一年级
+            "grade1_1": {
+                title: "一年级上册",
+                grade: "一年级",
+                term: "上册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 1001, title: "识字(2-5)", chars: [
+                            { c: "一", w: "一个" }, { c: "二", w: "二月" }, { c: "三", w: "三天" }, { c: "上", w: "上山" },
+                            { c: "口", w: "人口" }, { c: "目", w: "耳目" }, { c: "耳", w: "耳朵" }, { c: "手", w: "小手" },
+                            { c: "日", w: "日子" }, { c: "田", w: "田地" }, { c: "禾", w: "禾苗" }, { c: "火", w: "大火" },
+                            { c: "虫", w: "虫子" }, { c: "云", w: "白云" }, { c: "山", w: "大山" }
+                        ]
+                    },
+                    {
+                        id: 1002, title: "语文园地(一)", chars: [
+                            { c: "八", w: "八个" }, { c: "十", w: "十天" }
+                        ]
+                    },
+                    {
+                        id: 1003, title: "课文(1-4)", chars: [
+                            { c: "了", w: "来了" }, { c: "子", w: "儿子" }, { c: "人", w: "大人" }, { c: "大", w: "大哥" },
+                            { c: "月", w: "月牙" }, { c: "儿", w: "儿子" }, { c: "头", w: "头发" }, { c: "里", w: "里面" },
+                            { c: "可", w: "可是" }, { c: "东", w: "东西" }, { c: "西", w: "西方" },
+                            { c: "天", w: "白天" }, { c: "四", w: "四天" }, { c: "是", w: "是的" }
+                        ]
+                    },
+                    {
+                        id: 1004, title: "语文园地(四)", chars: [
+                            { c: "女", w: "女儿" }, { c: "开", w: "开心" }
+                        ]
+                    },
+                    {
+                        id: 1005, title: "识字(6-10)", chars: [
+                            { c: "水", w: "水牛" }, { c: "去", w: "下去" }, { c: "来", w: "上来" }, { c: "不", w: "不好" },
+                            { c: "小", w: "大小" }, { c: "少", w: "多少" }, { c: "牛", w: "黄牛" }, { c: "果", w: "水果" }, { c: "鸟", w: "小鸟" },
+                            { c: "早", w: "早上" }, { c: "书", w: "书本" }, { c: "刀", w: "小刀" }, { c: "尺", w: "尺子" }, { c: "本", w: "本来" },
+                            { c: "木", w: "木头" }, { c: "林", w: "树林" }, { c: "土", w: "土里" }, { c: "力", w: "用力" }, { c: "心", w: "开心" },
+                            { c: "中", w: "中间" }, { c: "五", w: "五个" }, { c: "立", w: "立正" }, { c: "正", w: "正在" }
+                        ]
+                    },
+                    {
+                        id: 1006, title: "课文(5-9)", chars: [
+                            { c: "在", w: "正在" }, { c: "后", w: "后天" }, { c: "我", w: "我们" }, { c: "好", w: "好人" },
+                            { c: "长", w: "长江" }, { c: "比", w: "对比" }, { c: "巴", w: "尾巴" }, { c: "把", w: "把手" },
+                            { c: "下", w: "下来" }, { c: "个", w: "个人" }, { c: "雨", w: "下雨" }, { c: "们", w: "我们" },
+                            { c: "问", w: "问好" }, { c: "有", w: "没有" }, { c: "半", w: "半天" }, { c: "从", w: "从来" }, { c: "你", w: "你好" },
+                            { c: "才", w: "刚才" }, { c: "明", w: "明天" }, { c: "同", w: "同学" }, { c: "学", w: "上学" }
+                        ]
+                    },
+                    {
+                        id: 1007, title: "课文(10-14)", chars: [
+                            { c: "自", w: "自己" }, { c: "己", w: "知己" }, { c: "门", w: "大门" }, { c: "衣", w: "上衣" },
+                            { c: "白", w: "白天" }, { c: "的", w: "好的" }, { c: "又", w: "又来" }, { c: "和", w: "和气" },
+                            { c: "竹", w: "竹子" }, { c: "牙", w: "月牙" }, { c: "马", w: "小马" }, { c: "用", w: "用力" }, { c: "几", w: "几个" },
+                            { c: "只", w: "一只" }, { c: "石", w: "石头" }, { c: "出", w: "出门" }, { c: "见", w: "再见" },
+                            { c: "对", w: "不对" }, { c: "妈", w: "妈妈" }, { c: "全", w: "全家" }, { c: "回", w: "回家" }
+                        ]
+                    },
+                    {
+                        id: 1008, title: "语文园地(八)", chars: [
+                            { c: "工", w: "工厂" }, { c: "厂", w: "厂家" }
+                        ]
+                    }
+                ]
+            },
+            "grade1_2": {
+                title: "一年级下册",
+                grade: "一年级",
+                term: "下册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 1101, title: "识字1", chars: [
+                            { c: "春", w: "春天" }, { c: "冬", w: "冬天" }, { c: "风", w: "春风" }, { c: "雪", w: "下雪" },
+                            { c: "花", w: "开花" }, { c: "飞", w: "飞鸟" }, { c: "入", w: "进入" }
+                        ]
+                    },
+                    {
+                        id: 1102, title: "识字2", chars: [
+                            { c: "姓", w: "姓名" }, { c: "什", w: "什么" }, { c: "么", w: "什么" }, { c: "双", w: "双手" },
+                            { c: "国", w: "中国" }, { c: "王", w: "国王" }, { c: "方", w: "方向" }
+                        ]
+                    },
+                    {
+                        id: 1103, title: "识字3", chars: [
+                            { c: "青", w: "青草" }, { c: "清", w: "清水" }, { c: "气", w: "空气" }, { c: "晴", w: "晴天" },
+                            { c: "情", w: "心情" }, { c: "请", w: "请问" }, { c: "生", w: "生日" }
+                        ]
+                    },
+                    {
+                        id: 1104, title: "识字4", chars: [
+                            { c: "字", w: "写字" }, { c: "左", w: "左右" }, { c: "右", w: "右边" }, { c: "红", w: "红色" },
+                            { c: "时", w: "时间" }, { c: "动", w: "运动" }, { c: "万", w: "万一" }
+                        ]
+                    },
+                    {
+                        id: 1105, title: "课文1", chars: [
+                            { c: "吃", w: "吃饭" }, { c: "叫", w: "叫声" }, { c: "主", w: "主人" }, { c: "江", w: "长江" },
+                            { c: "住", w: "住房" }, { c: "没", w: "没有" }, { c: "以", w: "以后" }
+                        ]
+                    },
+                    {
+                        id: 1106, title: "课文2", chars: [
+                            { c: "多", w: "很多" }, { c: "会", w: "开会" }, { c: "走", w: "走路" }, { c: "北", w: "北方" },
+                            { c: "京", w: "北京" }, { c: "广", w: "广大" }, { c: "公", w: "公园" }
+                        ]
+                    },
+                    {
+                        id: 1107, title: "课文3", chars: [
+                            { c: "太", w: "太阳" }, { c: "阳", w: "阳光" }, { c: "校", w: "学校" }, { c: "金", w: "金色" },
+                            { c: "秋", w: "秋天" }, { c: "因", w: "因为" }, { c: "为", w: "为了" }
+                        ]
+                    },
+                    {
+                        id: 1108, title: "课文4", chars: [
+                            { c: "他", w: "他们" }, { c: "地", w: "土地" }, { c: "河", w: "小河" }, { c: "说", w: "说话" },
+                            { c: "也", w: "也是" }, { c: "听", w: "听见" }, { c: "哥", w: "哥哥" }
+                        ]
+                    },
+                    {
+                        id: 1109, title: "课文5", chars: [
+                            { c: "单", w: "单独" }, { c: "种", w: "种花" }, { c: "居", w: "居住" }, { c: "招", w: "招手" },
+                            { c: "呼", w: "呼叫" }, { c: "快", w: "快乐" }, { c: "乐", w: "音乐" }
+                        ]
+                    },
+                    {
+                        id: 1110, title: "课文6", chars: [
+                            { c: "玩", w: "玩耍" }, { c: "很", w: "很好" }, { c: "当", w: "当时" }, { c: "音", w: "声音" },
+                            { c: "讲", w: "讲话" }, { c: "行", w: "行走" }, { c: "许", w: "许多" }
+                        ]
+                    },
+                    {
+                        id: 1111, title: "课文7", chars: [
+                            { c: "思", w: "思念" }, { c: "床", w: "床上" }, { c: "前", w: "前后" }, { c: "光", w: "阳光" },
+                            { c: "低", w: "高低" }, { c: "故", w: "故事" }, { c: "乡", w: "家乡" }
+                        ]
+                    },
+                    {
+                        id: 1112, title: "课文8", chars: [
+                            { c: "色", w: "颜色" }, { c: "外", w: "外面" }, { c: "看", w: "看见" }, { c: "爸", w: "爸爸" },
+                            { c: "晚", w: "晚上" }, { c: "笑", w: "微笑" }, { c: "再", w: "再见" }
+                        ]
+                    },
+                    {
+                        id: 1113, title: "课文9", chars: [
+                            { c: "午", w: "中午" }, { c: "节", w: "节日" }, { c: "叶", w: "树叶" }, { c: "米", w: "大米" },
+                            { c: "分", w: "分开" }, { c: "样", w: "一样" }, { c: "豆", w: "豆子" }
+                        ]
+                    },
+                    {
+                        id: 1114, title: "课文10", chars: [
+                            { c: "那", w: "那里" }, { c: "着", w: "看着" }, { c: "到", w: "到达" }, { c: "高", w: "高大" },
+                            { c: "兴", w: "高兴" }, { c: "千", w: "千万" }, { c: "成", w: "成功" }
+                        ]
+                    },
+                    {
+                        id: 1115, title: "识字5", chars: [
+                            { c: "间", w: "中间" }, { c: "迷", w: "迷路" }, { c: "造", w: "制造" }, { c: "运", w: "运动" },
+                            { c: "池", w: "水池" }, { c: "欢", w: "欢乐" }, { c: "网", w: "上网" }
+                        ]
+                    },
+                    {
+                        id: 1116, title: "识字6", chars: [
+                            { c: "古", w: "古代" }, { c: "凉", w: "凉快" }, { c: "细", w: "细心" }, { c: "夕", w: "夕阳" },
+                            { c: "李", w: "李子" }, { c: "语", w: "语文" }, { c: "香", w: "香味" }
+                        ]
+                    },
+                    {
+                        id: 1117, title: "识字7", chars: [
+                            { c: "打", w: "打球" }, { c: "拍", w: "拍手" }, { c: "跑", w: "跑步" }, { c: "足", w: "足球" },
+                            { c: "声", w: "声音" }, { c: "身", w: "身体" }, { c: "体", w: "体育" }
+                        ]
+                    },
+                    {
+                        id: 1118, title: "识字8", chars: [
+                            { c: "之", w: "之后" }, { c: "相", w: "相信" }, { c: "近", w: "附近" }, { c: "习", w: "学习" },
+                            { c: "远", w: "远方" }, { c: "玉", w: "玉石" }, { c: "义", w: "意义" }
+                        ]
+                    },
+                    {
+                        id: 1119, title: "课文11", chars: [
+                            { c: "首", w: "首先" }, { c: "采", w: "采花" }, { c: "无", w: "无法" }, { c: "树", w: "大树" },
+                            { c: "爱", w: "爱心" }, { c: "尖", w: "尖锐" }, { c: "角", w: "角落" }
+                        ]
+                    },
+                    {
+                        id: 1120, title: "课文12", chars: [
+                            { c: "亮", w: "明亮" }, { c: "机", w: "飞机" }, { c: "台", w: "台风" }, { c: "放", w: "放学" },
+                            { c: "鱼", w: "小鱼" }, { c: "朵", w: "花朵" }, { c: "美", w: "美丽" }
+                        ]
+                    },
+                    {
+                        id: 1121, title: "课文13", chars: [
+                            { c: "过", w: "经过" }, { c: "这", w: "这里" }, { c: "呀", w: "好呀" }, { c: "边", w: "旁边" },
+                            { c: "吗", w: "好吗" }, { c: "吧", w: "好吧" }, { c: "加", w: "加油" }
+                        ]
+                    },
+                    {
+                        id: 1122, title: "课文14", chars: [
+                            { c: "文", w: "语文" }, { c: "平", w: "平安" }, { c: "办", w: "办法" }, { c: "让", w: "让开" },
+                            { c: "包", w: "书包" }, { c: "伙", w: "伙伴" }, { c: "伴", w: "陪伴" }
+                        ]
+                    },
+                    {
+                        id: 1123, title: "课文15", chars: [
+                            { c: "钟", w: "时钟" }, { c: "丁", w: "丁当" }, { c: "元", w: "元旦" }, { c: "面", w: "面条" },
+                            { c: "羊", w: "小羊" }, { c: "共", w: "共同" }, { c: "坐", w: "坐下" }
+                        ]
+                    },
+                    {
+                        id: 1124, title: "课文16", chars: [
+                            { c: "要", w: "重要" }, { c: "连", w: "连接" }, { c: "百", w: "百年" }, { c: "今", w: "今天" },
+                            { c: "还", w: "还是" }, { c: "舌", w: "舌头" }, { c: "点", w: "一点" }
+                        ]
+                    },
+                    {
+                        id: 1125, title: "课文17", chars: [
+                            { c: "块", w: "一块" }, { c: "非", w: "非常" }, { c: "常", w: "经常" }, { c: "往", w: "往前" },
+                            { c: "片", w: "一片" }, { c: "瓜", w: "西瓜" }, { c: "进", w: "进去" }, { c: "空", w: "天空" }
+                        ]
+                    },
+                    {
+                        id: 1126, title: "课文18", chars: [
+                            { c: "病", w: "生病" }, { c: "她", w: "她们" }, { c: "医", w: "医生" }, { c: "别", w: "别人" },
+                            { c: "干", w: "干净" }, { c: "奇", w: "奇怪" }, { c: "七", w: "七天" }, { c: "星", w: "星星" }
+                        ]
+                    },
+                    {
+                        id: 1127, title: "课文19", chars: [
+                            { c: "吓", w: "吓人" }, { c: "怕", w: "害怕" }, { c: "跟", w: "跟着" }, { c: "起", w: "起来" },
+                            { c: "家", w: "家人" }, { c: "羊", w: "山羊" }, { c: "象", w: "大象" }, { c: "都", w: "都是" }
+                        ]
+                    },
+                    {
+                        id: 1128, title: "课文20", chars: [
+                            { c: "捉", w: "捉虫" }, { c: "条", w: "条件" }, { c: "向", w: "方向" }, { c: "爬", w: "爬山" },
+                            { c: "姐", w: "姐姐" }, { c: "您", w: "您好" }, { c: "草", w: "小草" }, { c: "房", w: "房子" }
+                        ]
+                    }
+                ]
+            },
+
+            // 二年级
+            "grade2_1": {
+                title: "二年级上册",
+                grade: "二年级",
+                term: "上册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 2001, title: "课文1", chars: [
+                            { c: "找", w: "找到" }, { c: "两", w: "两个" }, { c: "哪", w: "哪里" }, { c: "宽", w: "宽大" },
+                            { c: "顶", w: "头顶" }, { c: "眼", w: "眼睛" }, { c: "睛", w: "眼睛" }, { c: "肚", w: "肚子" },
+                            { c: "皮", w: "皮肤" }, { c: "跳", w: "跳跃" }
+                        ]
+                    },
+                    {
+                        id: 2002, title: "课文2", chars: [
+                            { c: "变", w: "变化" }, { c: "极", w: "极端" }, { c: "傍", w: "傍晚" }, { c: "海", w: "大海" },
+                            { c: "洋", w: "海洋" }, { c: "作", w: "作业" }, { c: "坏", w: "坏人" }, { c: "给", w: "给予" },
+                            { c: "带", w: "带来" }
+                        ]
+                    },
+                    {
+                        id: 2003, title: "课文3", chars: [
+                            { c: "法", w: "办法" }, { c: "如", w: "如果" }, { c: "已", w: "已经" }, { c: "经", w: "经过" },
+                            { c: "它", w: "它们" }, { c: "娃", w: "娃娃" }, { c: "毛", w: "毛发" }, { c: "更", w: "更加" },
+                            { c: "知", w: "知道" }, { c: "识", w: "认识" }
+                        ]
+                    },
+                    {
+                        id: 2004, title: "识字1", chars: [
+                            { c: "处", w: "到处" }, { c: "园", w: "花园" }, { c: "桥", w: "小桥" }, { c: "群", w: "群众" },
+                            { c: "队", w: "队伍" }, { c: "旗", w: "国旗" }, { c: "铜", w: "铜牌" }, { c: "号", w: "号码" },
+                            { c: "领", w: "领导" }, { c: "巾", w: "毛巾" }
+                        ]
+                    },
+                    {
+                        id: 2005, title: "识字2", chars: [
+                            { c: "杨", w: "杨树" }, { c: "壮", w: "强壮" }, { c: "桐", w: "梧桐" }, { c: "枫", w: "枫叶" },
+                            { c: "松", w: "松树" }, { c: "柏", w: "柏树" }, { c: "棉", w: "棉花" }, { c: "杉", w: "杉树" },
+                            { c: "化", w: "变化" }, { c: "桂", w: "桂花" }
+                        ]
+                    },
+                    {
+                        id: 2006, title: "识字3", chars: [
+                            { c: "歌", w: "唱歌" }, { c: "写", w: "写字" }, { c: "丛", w: "草丛" }, { c: "深", w: "深浅" },
+                            { c: "六", w: "六个" }, { c: "熊", w: "熊猫" }, { c: "猫", w: "小猫" }, { c: "九", w: "九个" },
+                            { c: "朋", w: "朋友" }, { c: "友", w: "友好" }
+                        ]
+                    },
+                    {
+                        id: 2007, title: "识字4", chars: [
+                            { c: "季", w: "季节" }, { c: "吹", w: "吹风" }, { c: "肥", w: "肥胖" }, { c: "农", w: "农民" },
+                            { c: "事", w: "事情" }, { c: "忙", w: "忙碌" }, { c: "归", w: "归来" }, { c: "戴", w: "穿戴" },
+                            { c: "辛", w: "辛苦" }, { c: "苦", w: "苦难" }
+                        ]
+                    },
+                    {
+                        id: 2008, title: "课文4", chars: [
+                            { c: "称", w: "称呼" }, { c: "柱", w: "柱子" }, { c: "底", w: "底下" }, { c: "杆", w: "旗杆" },
+                            { c: "秤", w: "秤杆" }, { c: "做", w: "做事" }, { c: "岁", w: "岁月" }, { c: "站", w: "站立" },
+                            { c: "船", w: "小船" }, { c: "然", w: "然后" }
+                        ]
+                    },
+                    {
+                        id: 2009, title: "课文5", chars: [
+                            { c: "画", w: "画画" }, { c: "幅", w: "一幅" }, { c: "评", w: "评价" }, { c: "奖", w: "奖励" },
+                            { c: "纸", w: "白纸" }, { c: "报", w: "报纸" }, { c: "另", w: "另外" }, { c: "及", w: "及时" },
+                            { c: "拿", w: "拿起" }, { c: "并", w: "并且" }
+                        ]
+                    },
+                    {
+                        id: 2010, title: "课文6", chars: [
+                            { c: "封", w: "封闭" }, { c: "信", w: "信封" }, { c: "支", w: "一支" }, { c: "圆", w: "圆形" },
+                            { c: "珠", w: "珠子" }, { c: "笔", w: "铅笔" }, { c: "灯", w: "电灯" }, { c: "句", w: "句子" },
+                            { c: "电", w: "电话" }, { c: "影", w: "电影" }
+                        ]
+                    },
+                    {
+                        id: 2011, title: "课文7", chars: [
+                            { c: "哄", w: "哄骗" }, { c: "先", w: "先生" }, { c: "闭", w: "关闭" }, { c: "脸", w: "脸面" },
+                            { c: "沉", w: "沉重" }, { c: "发", w: "发现" }, { c: "窗", w: "窗户" }, { c: "沙", w: "沙子" }
+                        ]
+                    },
+                    {
+                        id: 2012, title: "课文8", chars: [
+                            { c: "依", w: "依靠" }, { c: "尽", w: "尽力" }, { c: "黄", w: "黄色" }, { c: "层", w: "楼层" },
+                            { c: "照", w: "照顾" }, { c: "炉", w: "火炉" }, { c: "烟", w: "烟雾" }, { c: "挂", w: "挂起" },
+                            { c: "川", w: "山川" }, { c: "直", w: "直接" }
+                        ]
+                    },
+                    {
+                        id: 2013, title: "课文9", chars: [
+                            { c: "南", w: "南方" }, { c: "部", w: "部分" }, { c: "些", w: "一些" }, { c: "巨", w: "巨大" },
+                            { c: "真", w: "真实" }, { c: "位", w: "位置" }, { c: "每", w: "每天" }, { c: "升", w: "升起" },
+                            { c: "闪", w: "闪光" }, { c: "狗", w: "小狗" }
+                        ]
+                    },
+                    {
+                        id: 2014, title: "课文10", chars: [
+                            { c: "湾", w: "海湾" }, { c: "名", w: "名字" }, { c: "胜", w: "胜利" }, { c: "迹", w: "痕迹" },
+                            { c: "央", w: "中央" }, { c: "丽", w: "美丽" }, { c: "展", w: "展开" }, { c: "现", w: "现在" }
+                        ]
+                    },
+                    {
+                        id: 2015, title: "课文11", chars: [
+                            { c: "产", w: "生产" }, { c: "份", w: "一份" }, { c: "披", w: "披着" }, { c: "枝", w: "树枝" },
+                            { c: "客", w: "客人" }, { c: "老", w: "老人" }, { c: "收", w: "收拾" }, { c: "城", w: "城市" },
+                            { c: "市", w: "市场" }
+                        ]
+                    },
+                    {
+                        id: 2016, title: "课文12", chars: [
+                            { c: "井", w: "水井" }, { c: "观", w: "观看" }, { c: "沿", w: "沿着" }, { c: "答", w: "回答" },
+                            { c: "渴", w: "口渴" }, { c: "喝", w: "喝水" }, { c: "话", w: "说话" }, { c: "际", w: "国际" }
+                        ]
+                    },
+                    {
+                        id: 2017, title: "课文13", chars: [
+                            { c: "脚", w: "脚步" }, { c: "道", w: "道路" }, { c: "阵", w: "一阵" }, { c: "朗", w: "晴朗" },
+                            { c: "枯", w: "枯萎" }, { c: "却", w: "却是" }, { c: "第", w: "第一" }, { c: "将", w: "将来" },
+                            { c: "难", w: "难过" }, { c: "纷", w: "纷纷" }
+                        ]
+                    },
+                    {
+                        id: 2018, title: "课文14", chars: [
+                            { c: "棵", w: "一棵" }, { c: "谢", w: "谢谢" }, { c: "次", w: "一次" }, { c: "想", w: "想念" },
+                            { c: "盯", w: "盯着" }, { c: "言", w: "发言" }, { c: "呢", w: "呢喃" }, { c: "邻", w: "邻居" },
+                            { c: "治", w: "治疗" }, { c: "怪", w: "奇怪" }
+                        ]
+                    },
+                    {
+                        id: 2019, title: "课文15", chars: [
+                            { c: "楼", w: "楼房" }, { c: "年", w: "年代" }, { c: "夜", w: "夜晚" }, { c: "披", w: "披着" },
+                            { c: "轻", w: "轻松" }, { c: "利", w: "利益" }
+                        ]
+                    },
+                    {
+                        id: 2020, title: "课文16", chars: [
+                            { c: "扁", w: "扁豆" }, { c: "担", w: "担心" }, { c: "志", w: "志气" }, { c: "伍", w: "队伍" },
+                            { c: "师", w: "老师" }, { c: "军", w: "军队" }, { c: "战", w: "战斗" }, { c: "士", w: "战士" }
+                        ]
+                    },
+                    {
+                        id: 2021, title: "课文17", chars: [
+                            { c: "忘", w: "忘记" }, { c: "泼", w: "活泼" }, { c: "度", w: "温度" }, { c: "龙", w: "龙王" },
+                            { c: "炮", w: "大炮" }, { c: "穿", w: "穿上" }, { c: "始", w: "开始" }, { c: "令", w: "命令" }
+                        ]
+                    },
+                    {
+                        id: 2022, title: "课文18", chars: [
+                            { c: "刘", w: "刘海" }, { c: "胡", w: "胡说" }, { c: "兰", w: "兰花" }, { c: "反", w: "反对" },
+                            { c: "衬", w: "衬衫" }, { c: "被", w: "被子" }, { c: "关", w: "关闭" }
+                        ]
+                    },
+                    {
+                        id: 2023, title: "课文19", chars: [
+                            { c: "危", w: "危险" }, { c: "敢", w: "勇敢" }, { c: "惊", w: "惊讶" }, { c: "阴", w: "阴天" },
+                            { c: "似", w: "似乎" }, { c: "野", w: "野外" }, { c: "苍", w: "苍白" }, { c: "茫", w: "茫然" }
+                        ]
+                    },
+                    {
+                        id: 2024, title: "课文20", chars: [
+                            { c: "孩", w: "孩子" }, { c: "于", w: "于是" }, { c: "论", w: "讨论" }, { c: "岸", w: "河岸" },
+                            { c: "屋", w: "房屋" }, { c: "切", w: "一切" }, { c: "久", w: "长久" }, { c: "散", w: "散步" },
+                            { c: "步", w: "步行" }
+                        ]
+                    },
+                    {
+                        id: 2025, title: "课文21", chars: [
+                            { c: "唱", w: "唱歌" }, { c: "赶", w: "赶快" }, { c: "旺", w: "兴旺" }, { c: "旁", w: "旁边" },
+                            { c: "浑", w: "浑身" }, { c: "候", w: "时候" }, { c: "谁", w: "谁的" }, { c: "汽", w: "汽车" }
+                        ]
+                    },
+                    {
+                        id: 2026, title: "课文22", chars: [
+                            { c: "食", w: "食物" }, { c: "物", w: "物品" }, { c: "爷", w: "爷爷" }, { c: "就", w: "就是" },
+                            { c: "爪", w: "爪子" }, { c: "神", w: "神奇" }, { c: "活", w: "生活" }, { c: "猪", w: "小猪" }
+                        ]
+                    },
+                    {
+                        id: 2027, title: "课文23", chars: [
+                            { c: "折", w: "折纸" }, { c: "张", w: "张开" }, { c: "祝", w: "祝福" }, { c: "扎", w: "扎实" },
+                            { c: "抓", w: "抓住" }, { c: "吵", w: "吵闹" }, { c: "但", w: "但是" }, { c: "哭", w: "哭泣" }
+                        ]
+                    },
+                    {
+                        id: 2028, title: "课文24", chars: [
+                            { c: "得", w: "得到" }, { c: "秧", w: "秧苗" }, { c: "苗", w: "禾苗" }, { c: "汗", w: "汗水" },
+                            { c: "急", w: "着急" }, { c: "场", w: "广场" }, { c: "伤", w: "受伤" }, { c: "路", w: "道路" }
+                        ]
+                    }
+                ]
+            },
+            "grade2_2": {
+                title: "二年级下册",
+                grade: "二年级",
+                term: "下册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 2201, title: "课文1", chars: [
+                            { c: "诗", w: "古诗" }, { c: "童", w: "儿童" }, { c: "趁", w: "趁早" }, { c: "碧", w: "碧绿" },
+                            { c: "妆", w: "化妆" }, { c: "绿", w: "绿色" }, { c: "丝", w: "丝绸" }, { c: "剪", w: "剪刀" }
+                        ]
+                    },
+                    {
+                        id: 2202, title: "课文2", chars: [
+                            { c: "冲", w: "冲水" }, { c: "寻", w: "寻找" }, { c: "姑", w: "姑娘" }, { c: "娘", w: "新娘" },
+                            { c: "吐", w: "吐出" }, { c: "柳", w: "柳树" }, { c: "荡", w: "荡漾" }, { c: "桃", w: "桃花" },
+                            { c: "杏", w: "杏花" }
+                        ]
+                    },
+                    {
+                        id: 2203, title: "课文3", chars: [
+                            { c: "鲜", w: "鲜花" }, { c: "邮", w: "邮局" }, { c: "递", w: "传递" }, { c: "员", w: "人员" },
+                            { c: "原", w: "原来" }, { c: "叔", w: "叔叔" }, { c: "局", w: "局长" }, { c: "堆", w: "一堆" },
+                            { c: "认", w: "认识" }, { c: "礼", w: "礼物" }
+                        ]
+                    },
+                    {
+                        id: 2204, title: "课文4", chars: [
+                            { c: "邓", w: "邓小平" }, { c: "植", w: "植物" }, { c: "格", w: "格外" }, { c: "引", w: "引导" },
+                            { c: "注", w: "注意" }, { c: "满", w: "满意" }, { c: "休", w: "休息" }, { c: "息", w: "消息" }
+                        ]
+                    },
+                    {
+                        id: 2205, title: "课文5", chars: [
+                            { c: "锋", w: "雷锋" }, { c: "昨", w: "昨天" }, { c: "留", w: "留下" }, { c: "弯", w: "弯曲" },
+                            { c: "背", w: "背后" }, { c: "洒", w: "洒水" }, { c: "温", w: "温暖" }, { c: "暖", w: "温暖" }
+                        ]
+                    },
+                    {
+                        id: 2206, title: "课文6", chars: [
+                            { c: "能", w: "能力" }, { c: "桌", w: "桌子" }, { c: "味", w: "味道" }, { c: "买", w: "买卖" },
+                            { c: "具", w: "玩具" }, { c: "甘", w: "甘甜" }, { c: "甜", w: "甜蜜" }, { c: "菜", w: "青菜" },
+                            { c: "劳", w: "劳动" }
+                        ]
+                    },
+                    {
+                        id: 2207, title: "课文7", chars: [
+                            { c: "匹", w: "一匹" }, { c: "妹", w: "妹妹" }, { c: "波", w: "波浪" }, { c: "纹", w: "花纹" },
+                            { c: "像", w: "好像" }, { c: "景", w: "风景" }, { c: "恋", w: "恋爱" }, { c: "舍", w: "舍不得" },
+                            { c: "求", w: "要求" }
+                        ]
+                    },
+                    {
+                        id: 2208, title: "识字1", chars: [
+                            { c: "州", w: "广州" }, { c: "华", w: "中华" }, { c: "岛", w: "海岛" }, { c: "各", w: "各地" },
+                            { c: "民", w: "人民" }, { c: "族", w: "民族" }, { c: "谊", w: "友谊" }, { c: "齐", w: "整齐" },
+                            { c: "奋", w: "兴奋" }
+                        ]
+                    },
+                    {
+                        id: 2209, title: "识字2", chars: [
+                            { c: "贴", w: "粘贴" }, { c: "街", w: "街道" }, { c: "舟", w: "小舟" }, { c: "艾", w: "艾草" },
+                            { c: "敬", w: "尊敬" }, { c: "转", w: "转动" }, { c: "团", w: "团结" }, { c: "热", w: "热情" },
+                            { c: "闹", w: "热闹" }
+                        ]
+                    },
+                    {
+                        id: 2210, title: "识字3", chars: [
+                            { c: "贝", w: "宝贝" }, { c: "壳", w: "贝壳" }, { c: "甲", w: "甲虫" }, { c: "骨", w: "骨头" },
+                            { c: "钱", w: "金钱" }, { c: "币", w: "硬币" }, { c: "与", w: "与众不同" }, { c: "财", w: "财富" },
+                            { c: "购", w: "购买" }
+                        ]
+                    },
+                    {
+                        id: 2211, title: "识字4", chars: [
+                            { c: "烧", w: "烧烤" }, { c: "茄", w: "茄子" }, { c: "烤", w: "烤肉" }, { c: "鸭", w: "鸭子" },
+                            { c: "肉", w: "牛肉" }, { c: "鸡", w: "小鸡" }, { c: "蛋", w: "鸡蛋" }, { c: "炒", w: "炒菜" },
+                            { c: "饭", w: "米饭" }
+                        ]
+                    },
+                    {
+                        id: 2212, title: "课文8", chars: [
+                            { c: "彩", w: "彩色" }, { c: "梦", w: "做梦" }, { c: "森", w: "森林" }, { c: "拉", w: "拉手" },
+                            { c: "结", w: "结束" }, { c: "苹", w: "苹果" }, { c: "般", w: "一般" }, { c: "精", w: "精神" },
+                            { c: "灵", w: "灵活" }
+                        ]
+                    },
+                    {
+                        id: 2213, title: "课文9", chars: [
+                            { c: "伞", w: "雨伞" }, { c: "姨", w: "阿姨" }, { c: "弟", w: "弟弟" }, { c: "便", w: "方便" },
+                            { c: "教", w: "教书" }, { c: "游", w: "游戏" }, { c: "戏", w: "演戏" }, { c: "母", w: "母亲" }
+                        ]
+                    },
+                    {
+                        id: 2214, title: "课文10", chars: [
+                            { c: "周", w: "周围" }, { c: "围", w: "四周" }, { c: "补", w: "补充" }, { c: "充", w: "充满" },
+                            { c: "药", w: "吃药" }, { c: "合", w: "合作" }, { c: "死", w: "死亡" }, { c: "记", w: "记住" }
+                        ]
+                    },
+                    {
+                        id: 2215, title: "课文11", chars: [
+                            { c: "屁", w: "放屁" }, { c: "股", w: "股票" }, { c: "净", w: "干净" }, { c: "总", w: "总是" },
+                            { c: "辛", w: "辛苦" }, { c: "婶", w: "婶婶" }, { c: "使", w: "使用" }, { c: "劲", w: "使劲" }
+                        ]
+                    },
+                    {
+                        id: 2216, title: "课文12", chars: [
+                            { c: "亡", w: "死亡" }, { c: "牢", w: "牢记" }, { c: "钻", w: "钻研" }, { c: "劝", w: "劝告" },
+                            { c: "丢", w: "丢失" }, { c: "告", w: "告诉" }, { c: "筋", w: "筋骨" }, { c: "疲", w: "疲劳" }
+                        ]
+                    },
+                    {
+                        id: 2217, title: "课文13", chars: [
+                            { c: "图", w: "图画" }, { c: "课", w: "课堂" }, { c: "摆", w: "摆放" }, { c: "座", w: "座位" },
+                            { c: "室", w: "教室" }, { c: "交", w: "交流" }, { c: "哈", w: "哈哈" }, { c: "页", w: "页面" },
+                            { c: "抢", w: "抢夺" }, { c: "嘻", w: "嘻嘻" }
+                        ]
+                    },
+                    {
+                        id: 2218, title: "课文14", chars: [
+                            { c: "愿", w: "愿意" }, { c: "意", w: "心意" }, { c: "麦", w: "小麦" }, { c: "该", w: "应该" },
+                            { c: "伯", w: "伯父" }, { c: "刻", w: "时刻" }, { c: "突", w: "突然" }, { c: "摔", w: "摔倒" }
+                        ]
+                    },
+                    {
+                        id: 2219, title: "课文15", chars: [
+                            { c: "湖", w: "湖水" }, { c: "莲", w: "莲花" }, { c: "穷", w: "穷人" }, { c: "荷", w: "荷花" },
+                            { c: "绝", w: "绝对" }, { c: "含", w: "包含" }, { c: "岭", w: "山岭" }, { c: "吴", w: "吴国" }
+                        ]
+                    },
+                    {
+                        id: 2220, title: "课文16", chars: [
+                            { c: "雷", w: "雷声" }, { c: "乌", w: "乌云" }, { c: "黑", w: "黑色" }, { c: "压", w: "压力" },
+                            { c: "垂", w: "低垂" }, { c: "户", w: "窗户" }, { c: "新", w: "新年" }, { c: "迎", w: "欢迎" },
+                            { c: "扑", w: "扑向" }
+                        ]
+                    },
+                    {
+                        id: 2221, title: "课文17", chars: [
+                            { c: "指", w: "手指" }, { c: "针", w: "针线" }, { c: "帮", w: "帮助" }, { c: "助", w: "帮助" },
+                            { c: "导", w: "指导" }, { c: "永", w: "永远" }, { c: "碰", w: "碰到" }, { c: "特", w: "特别" },
+                            { c: "积", w: "积累" }
+                        ]
+                    },
+                    {
+                        id: 2222, title: "课文18", chars: [
+                            { c: "杯", w: "杯子" }, { c: "失", w: "失去" }, { c: "洗", w: "洗手" }, { c: "澡", w: "洗澡" },
+                            { c: "容", w: "容易" }, { c: "易", w: "容易" }, { c: "浴", w: "沐浴" }, { c: "桶", w: "水桶" }
+                        ]
+                    },
+                    {
+                        id: 2223, title: "课文19", chars: [
+                            { c: "扇", w: "扇子" }, { c: "慢", w: "慢慢" }, { c: "遇", w: "遇见" }, { c: "兔", w: "兔子" },
+                            { c: "安", w: "安全" }, { c: "根", w: "根本" }, { c: "痛", w: "疼痛" }, { c: "最", w: "最好" }
+                        ]
+                    },
+                    {
+                        id: 2224, title: "课文20", chars: [
+                            { c: "店", w: "商店" }, { c: "决", w: "决定" }, { c: "定", w: "决定" }, { c: "商", w: "商人" },
+                            { c: "夫", w: "大夫" }, { c: "终", w: "终于" }, { c: "完", w: "完成" }, { c: "换", w: "交换" },
+                            { c: "期", w: "日期" }
+                        ]
+                    },
+                    {
+                        id: 2225, title: "课文21", chars: [
+                            { c: "蛙", w: "青蛙" }, { c: "卖", w: "买卖" }, { c: "搬", w: "搬家" }, { c: "倒", w: "倒下" },
+                            { c: "籽", w: "种籽" }, { c: "泉", w: "泉水" }, { c: "破", w: "破坏" }, { c: "应", w: "应该" }
+                        ]
+                    },
+                    {
+                        id: 2226, title: "课文22", chars: [
+                            { c: "整", w: "整理" }, { c: "抽", w: "抽水" }, { c: "纺", w: "纺织" }, { c: "织", w: "编织" },
+                            { c: "编", w: "编辑" }, { c: "怎", w: "怎么" }, { c: "布", w: "布料" }, { c: "消", w: "消失" }
+                        ]
+                    },
+                    {
+                        id: 2227, title: "课文23", chars: [
+                            { c: "祖", w: "祖国" }, { c: "啊", w: "好啊" }, { c: "浓", w: "浓郁" }, { c: "望", w: "希望" },
+                            { c: "蓝", w: "蓝色" }, { c: "摘", w: "采摘" }, { c: "掏", w: "掏出" }, { c: "赛", w: "比赛" },
+                            { c: "忆", w: "回忆" }
+                        ]
+                    },
+                    {
+                        id: 2228, title: "课文24", chars: [
+                            { c: "觉", w: "感觉" }, { c: "值", w: "价值" }, { c: "类", w: "人类" }, { c: "艰", w: "艰难" },
+                            { c: "弓", w: "弓箭" }, { c: "炎", w: "炎热" }, { c: "害", w: "害怕" }, { c: "此", w: "此刻" }
+                        ]
+                    },
+                    {
+                        id: 2229, title: "课文25", chars: [
+                            { c: "帝", w: "皇帝" }, { c: "传", w: "传说" }, { c: "忽", w: "忽然" }, { c: "启", w: "启发" },
+                            { c: "由", w: "由于" }, { c: "理", w: "道理" }, { c: "段", w: "一段" }, { c: "通", w: "通过" }
+                        ]
+                    }
+                ]
+            },
+
+            // 三年级
+            "grade3_1": {
+                title: "三年级上册",
+                grade: "三年级",
+                term: "上册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 1, title: "第1课", chars: [
+                            { c: "坡", w: "山坡" }, { c: "球", w: "足球" }, { c: "招", w: "招手" }, { c: "呼", w: "呼吸" },
+                            { c: "飘", w: "飘扬" }, { c: "扬", w: "飞扬" }, { c: "读", w: "朗读" }, { c: "热", w: "热闹" },
+                            { c: "闹", w: "吵闹" }, { c: "粗", w: "粗壮" }, { c: "壮", w: "强壮" }, { c: "洁", w: "洁白" }
+                        ]
+                    },
+                    {
+                        id: 2, title: "第2课", chars: [
+                            { c: "轰", w: "轰隆隆" }, { c: "湿", w: "湿润" }, { c: "润", w: "滋润" }, { c: "笛", w: "口笛" },
+                            { c: "狂", w: "狂风" }, { c: "功", w: "功课" }, { c: "罚", w: "惩罚" }, { c: "互", w: "互相" },
+                            { c: "碰", w: "碰触" }, { c: "黄", w: "金黄" }, { c: "急", w: "着急" }
+                        ]
+                    },
+                    {
+                        id: 4, title: "第4课", chars: [
+                            { c: "庭", w: "家庭" }, { c: "相", w: "互相" }, { c: "未", w: "未来" }, { c: "寒", w: "寒冷" },
+                            { c: "径", w: "小径" }, { c: "斜", w: "倾斜" }, { c: "枫", w: "枫叶" }, { c: "霜", w: "风霜" },
+                            { c: "挑", w: "挑战" }, { c: "深", w: "深浅" }, { c: "落", w: "落叶" }
+                        ]
+                    },
+                    {
+                        id: 5, title: "第5课", chars: [
+                            { c: "朗", w: "晴朗" }, { c: "晶", w: "亮晶晶" }, { c: "珠", w: "露珠" }, { c: "粘", w: "粘贴" },
+                            { c: "印", w: "脚印" }, { c: "案", w: "图案" }, { c: "展", w: "展开" }, { c: "列", w: "排列" },
+                            { c: "规", w: "规则" }, { c: "则", w: "原则" }, { c: "凌", w: "凌乱" }, { c: "乱", w: "杂乱" }
+                        ]
+                    },
+                    {
+                        id: 6, title: "第6课", chars: [
+                            { c: "凉", w: "清凉" }, { c: "杏", w: "杏叶" }, { c: "枚", w: "一枚" }, { c: "邮", w: "邮票" },
+                            { c: "票", w: "车票" }, { c: "爽", w: "凉爽" }, { c: "挤", w: "拥挤" }, { c: "争", w: "争取" },
+                            { c: "菊", w: "菊花" }, { c: "频", w: "频繁" }, { c: "勾", w: "勾住" }, { c: "挖", w: "挖掘" },
+                            { c: "油", w: "石油" }
+                        ]
+                    },
+                    {
+                        id: 8, title: "第8课", chars: [
+                            { c: "屋", w: "房屋" }, { c: "板", w: "地板" }, { c: "准", w: "准备" }, { c: "备", w: "预备" },
+                            { c: "等", w: "等待" }, { c: "暴", w: "暴雨" }, { c: "哦", w: "哦" }, { c: "钻", w: "钻洞" },
+                            { c: "爬", w: "爬行" }, { c: "漂", w: "漂亮" }, { c: "晒", w: "晒太阳" }
+                        ]
+                    },
+                    {
+                        id: 11, title: "第11课", chars: [
+                            { c: "胡", w: "胡萝卜" }, { c: "芦", w: "葫芦" }, { c: "错", w: "不错" }, { c: "普", w: "普通" },
+                            { c: "宫", w: "皇宫" }, { c: "肯", w: "肯定" }, { c: "冒", w: "假冒" }, { c: "式", w: "形式" },
+                            { c: "怜", w: "可怜" }
+                        ]
+                    },
+                    {
+                        id: 12, title: "第12课", chars: [
+                            { c: "旅", w: "旅行" }, { c: "另", w: "另外" }, { c: "晴", w: "晴朗" }, { c: "及", w: "及时" },
+                            { c: "卷", w: "试卷" }, { c: "救", w: "救命" }, { c: "命", w: "生命" }, { c: "尾", w: "尾巴" },
+                            { c: "齿", w: "牙齿" }, { c: "胃", w: "胃口" }, { c: "管", w: "管理" }, { c: "刚", w: "刚才" },
+                            { c: "咬", w: "咬人" }
+                        ]
+                    },
+                    {
+                        id: 100, title: "语文园地(1)", chars: [
+                            { c: "申", w: "申请" }, { c: "介", w: "介绍" }, { c: "绍", w: "介绍" }, { c: "宗", w: "宗旨" },
+                            { c: "旨", w: "宗旨" }, { c: "占", w: "占领" }, { c: "之", w: "之前" }
+                        ]
+                    },
+                    {
+                        id: 14, title: "第14课", chars: [
+                            { c: "搭", w: "搭船" }, { c: "亲", w: "母亲" }, { c: "祖", w: "祖父" }, { c: "父", w: "父亲" },
+                            { c: "沙", w: "沙子" }, { c: "啦", w: "沙啦" }, { c: "响", w: "响声" }, { c: "羽", w: "羽毛" },
+                            { c: "翠", w: "翠绿" }, { c: "嘴", w: "嘴巴" }, { c: "悄", w: "静悄悄" }, { c: "吞", w: "吞下" },
+                            { c: "捕", w: "捕鱼" }
+                        ]
+                    },
+                    {
+                        id: 15, title: "第15课", chars: [
+                            { c: "蒲", w: "蒲公英" }, { c: "英", w: "英雄" }, { c: "盛", w: "盛开" }, { c: "耍", w: "玩耍" },
+                            { c: "使", w: "使劲" }, { c: "劲", w: "使劲" }, { c: "脸", w: "笑脸" }, { c: "欠", w: "哈欠" },
+                            { c: "朝", w: "朝向" }, { c: "钓", w: "钓鱼" }, { c: "察", w: "观察" }, { c: "拢", w: "合拢" },
+                            { c: "喜", w: "喜爱" }
+                        ]
+                    },
+                    {
+                        id: 16, title: "第16课", chars: [
+                            { c: "景", w: "风景" }, { c: "优", w: "优美" }, { c: "淡", w: "淡青" }, { c: "浅", w: "浅绿" },
+                            { c: "底", w: "海底" }, { c: "岩", w: "岩石" }, { c: "鹿", w: "长颈鹿" }, { c: "划", w: "划船" },
+                            { c: "布", w: "布满" }, { c: "茂", w: "茂密" }, { c: "密", w: "密林" }, { c: "厚", w: "深厚" },
+                            { c: "料", w: "肥料" }
+                        ]
+                    },
+                    {
+                        id: 17, title: "第17课", chars: [
+                            { c: "滨", w: "海滨" }, { c: "棕", w: "棕色" }, { c: "帆", w: "帆船" }, { c: "灰", w: "灰色" },
+                            { c: "跟", w: "跟前" }, { c: "渔", w: "渔民" }, { c: "壳", w: "贝壳" }, { c: "院", w: "庭院" },
+                            { c: "亚", w: "亚热带" }, { c: "透", w: "透明" }, { c: "除", w: "除了" }, { c: "踩", w: "踩踏" }
+                        ]
+                    },
+                    {
+                        id: 18, title: "第18课", chars: [
+                            { c: "抽", w: "抽出" }, { c: "封", w: "封闭" }, { c: "严", w: "严实" }, { c: "挡", w: "挡住" },
+                            { c: "坛", w: "花坛" }, { c: "显", w: "显得" }, { c: "苍", w: "苍翠" }, { c: "药", w: "药材" },
+                            { c: "材", w: "木材" }, { c: "软", w: "松软" }, { c: "刮", w: "刮风" }, { c: "捉", w: "捕捉" }
+                        ]
+                    },
+                    {
+                        id: 20, title: "第20课", chars: [
+                            { c: "返", w: "返回" }, { c: "望", w: "看望" }, { c: "断", w: "打断" }, { c: "楚", w: "清楚" },
+                            { c: "至", w: "至今" }, { c: "岸", w: "河岸" }, { c: "孤", w: "孤单" }, { c: "饮", w: "饮料" },
+                            { c: "亦", w: "人云亦云" }, { c: "欲", w: "欲望" }, { c: "抹", w: "抹布" }, { c: "宜", w: "适宜" }
+                        ]
+                    },
+                    {
+                        id: 21, title: "第21课", chars: [
+                            { c: "妙", w: "美妙" }, { c: "奏", w: "演奏" }, { c: "琴", w: "钢琴" }, { c: "柔", w: "温柔" },
+                            { c: "感", w: "感受" }, { c: "充", w: "充满" }, { c: "威", w: "威力" }, { c: "器", w: "乐器" },
+                            { c: "汇", w: "汇聚" }, { c: "鸣", w: "鸣叫" }, { c: "塘", w: "池塘" }
+                        ]
+                    },
+                    {
+                        id: 22, title: "第22课", chars: [
+                            { c: "虾", w: "龙虾" }, { c: "昆", w: "昆虫" }, { c: "仅", w: "不仅" }, { c: "序", w: "顺序" },
+                            { c: "荣", w: "光荣" }, { c: "枯", w: "枯萎" }, { c: "姿", w: "姿态" }, { c: "态", w: "态度" },
+                            { c: "刺", w: "刺猬" }, { c: "梨", w: "梨树" }, { c: "部", w: "部分" }, { c: "奥", w: "深奥" },
+                            { c: "秘", w: "秘密" }
+                        ]
+                    },
+                    {
+                        id: 101, title: "语文园地(2)", chars: [
+                            { c: "螺", w: "螺丝" }, { c: "蛳", w: "螺蛳" }, { c: "蟹", w: "螃蟹" }, { c: "鲤", w: "鲤鱼" },
+                            { c: "鲫", w: "鲫鱼" }, { c: "鲨", w: "鲨鱼" }
+                        ]
+                    },
+                    {
+                        id: 23, title: "第23课", chars: [
+                            { c: "司", w: "司机" }, { c: "登", w: "登山" }, { c: "跌", w: "跌倒" }, { c: "皆", w: "皆大欢喜" },
+                            { c: "弃", w: "放弃" }, { c: "持", w: "坚持" }, { c: "击", w: "击掌" }
+                        ]
+                    },
+                    {
+                        id: 24, title: "第24课", chars: [
+                            { c: "念", w: "思念" }, { c: "差", w: "差别" }, { c: "考", w: "考试" }, { c: "试", w: "尝试" },
+                            { c: "均", w: "平均" }, { c: "退", w: "后退" }, { c: "努", w: "努力" }, { c: "单", w: "孤单" },
+                            { c: "留", w: "留下" }, { c: "度", w: "温度" }, { c: "奋", w: "兴奋" }
+                        ]
+                    },
+                    {
+                        id: 25, title: "第25课", chars: [
+                            { c: "棒", w: "木棒" }, { c: "伤", w: "受伤" }, { c: "陆", w: "陆地" }, { c: "血", w: "流血" },
+                            { c: "取", w: "取出" }, { c: "盘", w: "盘子" }, { c: "匆", w: "匆忙" }, { c: "医", w: "医生" },
+                            { c: "迅", w: "迅速" }, { c: "速", w: "速度" }, { c: "夺", w: "夺走" }, { c: "秒", w: "秒针" }
+                        ]
+                    },
+                    {
+                        id: 102, title: "语文园地(3)", chars: [
+                            { c: "睁", w: "睁眼" }, { c: "眨", w: "眨眼" }, { c: "瞪", w: "瞪眼" }, { c: "瞅", w: "瞅见" },
+                            { c: "怒", w: "发怒" }, { c: "眶", w: "眼眶" }, { c: "呆", w: "发呆" }, { c: "睹", w: "目睹" }
+                        ]
+                    }
+                ]
+            },
+            "grade3_2": {
+                title: "三年级下册",
+                grade: "三年级",
+                term: "下册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 3201, title: "课文1", chars: [
+                            { c: "融", w: "融化" }, { c: "燕", w: "燕子" }, { c: "鸳", w: "鸳鸯" }, { c: "鸯", w: "鸳鸯" },
+                            { c: "惠", w: "恩惠" }, { c: "崇", w: "崇拜" }, { c: "芦", w: "芦苇" }, { c: "芽", w: "发芽" },
+                            { c: "梅", w: "梅花" }, { c: "溪", w: "小溪" }, { c: "泛", w: "泛滥" }, { c: "减", w: "减少" }
+                        ]
+                    },
+                    {
+                        id: 3202, title: "课文2", chars: [
+                            { c: "凑", w: "凑合" }, { c: "拂", w: "吹拂" }, { c: "集", w: "集合" }, { c: "聚", w: "聚集" },
+                            { c: "形", w: "形状" }, { c: "掠", w: "掠过" }, { c: "偶", w: "偶然" }, { c: "尔", w: "偶尔" },
+                            { c: "沾", w: "沾水" }, { c: "倦", w: "疲倦" }, { c: "闲", w: "休闲" }, { c: "纤", w: "纤细" }, { c: "痕", w: "痕迹" }
+                        ]
+                    },
+                    {
+                        id: 3203, title: "课文3", chars: [
+                            { c: "瓣", w: "花瓣" }, { c: "蓬", w: "蓬松" }, { c: "胀", w: "膨胀" }, { c: "裂", w: "裂开" },
+                            { c: "姿", w: "姿态" }, { c: "势", w: "气势" }, { c: "仿", w: "仿佛" }, { c: "佛", w: "仿佛" },
+                            { c: "随", w: "随便" }, { c: "蹈", w: "舞蹈" }, { c: "止", w: "停止" }
+                        ]
+                    },
+                    {
+                        id: 3205, title: "课文5", chars: [
+                            { c: "守", w: "守护" }, { c: "株", w: "株连" }, { c: "待", w: "等待" }, { c: "宋", w: "宋朝" },
+                            { c: "耕", w: "耕种" }, { c: "触", w: "触摸" }, { c: "颈", w: "脖颈" }, { c: "释", w: "解释" }, { c: "其", w: "其他" }
+                        ]
+                    },
+                    {
+                        id: 3206, title: "课文6", chars: [
+                            { c: "骄", w: "骄傲" }, { c: "傲", w: "骄傲" }, { c: "谦", w: "谦虚" }, { c: "虚", w: "虚假" },
+                            { c: "懦", w: "懦弱" }, { c: "弱", w: "弱小" }, { c: "提", w: "提醒" }, { c: "尘", w: "灰尘" },
+                            { c: "讽", w: "讽刺" }, { c: "捧", w: "捧起" }, { c: "代", w: "代替" }, { c: "价", w: "价值" }
+                        ]
+                    },
+                    {
+                        id: 3207, title: "课文7", chars: [
+                            { c: "鹿", w: "鹿角" }, { c: "塘", w: "池塘" }, { c: "映", w: "倒映" }, { c: "欣", w: "欣赏" },
+                            { c: "赏", w: "欣赏" }, { c: "匀", w: "均匀" }, { c: "致", w: "精致" }, { c: "配", w: "搭配" },
+                            { c: "哎", w: "哎呀" }, { c: "狮", w: "狮子" }, { c: "追", w: "追赶" }, { c: "叹", w: "叹气" }
+                        ]
+                    },
+                    {
+                        id: 3209, title: "课文9", chars: [
+                            { c: "符", w: "符号" }, { c: "欲", w: "欲望" }, { c: "魂", w: "灵魂" }, { c: "借", w: "借用" },
+                            { c: "酒", w: "喝酒" }, { c: "何", w: "何时" }, { c: "牧", w: "放牧" }, { c: "兄", w: "兄弟" },
+                            { c: "独", w: "独自" }, { c: "异", w: "奇异" }, { c: "佳", w: "佳节" }
+                        ]
+                    },
+                    {
+                        id: 3210, title: "课文10", chars: [
+                            { c: "世", w: "世界" }, { c: "界", w: "边界" }, { c: "伟", w: "伟大" }, { c: "录", w: "记录" },
+                            { c: "保", w: "保护" }, { c: "存", w: "保存" }, { c: "约", w: "约定" }, { c: "验", w: "经验" },
+                            { c: "捞", w: "打捞" }, { c: "阿", w: "阿姨" }, { c: "欧", w: "欧洲" }, { c: "洲", w: "大洲" }, { c: "社", w: "社会" }
+                        ]
+                    },
+                    {
+                        id: 3211, title: "课文11", chars: [
+                            { c: "赵", w: "赵国" }, { c: "省", w: "省份" }, { c: "县", w: "县城" }, { c: "匠", w: "工匠" },
+                            { c: "设", w: "设计" }, { c: "计", w: "计划" }, { c: "史", w: "历史" }, { c: "创", w: "创造" },
+                            { c: "举", w: "举起" }, { c: "且", w: "而且" }, { c: "智", w: "智慧" }, { c: "慧", w: "智慧" }, { c: "历", w: "经历" }
+                        ]
+                    },
+                    {
+                        id: 3213, title: "课文13", chars: [
+                            { c: "芬", w: "芬芳" }, { c: "芳", w: "芬芳" }, { c: "内", w: "内部" }, { c: "醒", w: "苏醒" },
+                            { c: "寿", w: "寿命" }, { c: "苏", w: "苏醒" }, { c: "强", w: "强大" }, { c: "示", w: "表示" },
+                            { c: "昆", w: "昆虫" }, { c: "修", w: "修改" }, { c: "建", w: "建设" }, { c: "组", w: "组织" }
+                        ]
+                    },
+                    {
+                        id: 3214, title: "课文14", chars: [
+                            { c: "蜜", w: "蜂蜜" }, { c: "蜂", w: "蜜蜂" }, { c: "辨", w: "辨别" }, { c: "阻", w: "阻止" },
+                            { c: "跨", w: "跨越" }, { c: "括", w: "包括" }, { c: "检", w: "检查" }, { c: "查", w: "调查" },
+                            { c: "确", w: "确定" }, { c: "误", w: "错误" }, { c: "途", w: "旅途" }, { c: "陌", w: "陌生" }
+                        ]
+                    },
+                    {
+                        id: 3216, title: "课文16", chars: [
+                            { c: "宇", w: "宇宙" }, { c: "宙", w: "宇宙" }, { c: "淹", w: "淹没" }, { c: "秘", w: "秘密" },
+                            { c: "密", w: "密封" }, { c: "栋", w: "一栋" }, { c: "梯", w: "楼梯" }, { c: "铃", w: "铃铛" },
+                            { c: "乘", w: "乘坐" }, { c: "绪", w: "情绪" }, { c: "篇", w: "篇章" }, { c: "越", w: "超越" }
+                        ]
+                    },
+                    {
+                        id: 3217, title: "课文17", chars: [
+                            { c: "状", w: "形状" }, { c: "狐", w: "狐狸" }, { c: "狸", w: "狐狸" }, { c: "零", w: "零食" },
+                            { c: "巧", w: "巧妙" }, { c: "克", w: "克服" }, { c: "肠", w: "香肠" }, { c: "继", w: "继续" },
+                            { c: "续", w: "继续" }, { c: "抬", w: "抬头" }, { c: "烦", w: "烦恼" }
+                        ]
+                    },
+                    {
+                        id: 3218, title: "课文18", chars: [
+                            { c: "墨", w: "墨水" }, { c: "染", w: "染色" }, { c: "竿", w: "竹竿" }, { c: "腾", w: "腾飞" },
+                            { c: "碎", w: "破碎" }, { c: "拨", w: "拨动" }, { c: "浪", w: "浪花" }, { c: "葫", w: "葫芦" },
+                            { c: "爽", w: "凉爽" }, { c: "蘑", w: "蘑菇" }, { c: "菇", w: "蘑菇" }
+                        ]
+                    },
+                    {
+                        id: 3219, title: "课文19", chars: [
+                            { c: "表", w: "表示" }, { c: "胆", w: "胆量" }, { c: "夺", w: "夺取" }, { c: "骂", w: "责骂" },
+                            { c: "仇", w: "仇人" }, { c: "差", w: "差别" }, { c: "付", w: "付钱" }, { c: "倍", w: "倍数" },
+                            { c: "虽", w: "虽然" }, { c: "式", w: "方式" }, { c: "鬼", w: "魔鬼" }, { c: "泡", w: "泡沫" }, { c: "件", w: "条件" }
+                        ]
+                    },
+                    {
+                        id: 3220, title: "课文20", chars: [
+                            { c: "皂", w: "肥皂" }, { c: "剩", w: "剩余" }, { c: "碗", w: "饭碗" }, { c: "悠", w: "悠闲" },
+                            { c: "若", w: "若是" }, { c: "透", w: "透明" }, { c: "娇", w: "娇嫩" }, { c: "扯", w: "拉扯" },
+                            { c: "仰", w: "仰望" }, { c: "串", w: "一串" }, { c: "婴", w: "婴儿" }, { c: "希", w: "希望" }
+                        ]
+                    },
+                    {
+                        id: 3222, title: "课文22", chars: [
+                            { c: "呈", w: "呈现" }, { c: "幻", w: "幻想" }, { c: "诱", w: "诱惑" }, { c: "润", w: "滋润" },
+                            { c: "芒", w: "光芒" }, { c: "翔", w: "飞翔" }, { c: "冰", w: "冰块" }, { c: "剑", w: "宝剑" },
+                            { c: "普", w: "普通" }, { c: "模", w: "模仿" }, { c: "型", w: "类型" }
+                        ]
+                    },
+                    {
+                        id: 3223, title: "课文23", chars: [
+                            { c: "宁", w: "安宁" }, { c: "官", w: "官员" }, { c: "汪", w: "汪洋" }, { c: "参", w: "参加" },
+                            { c: "攻", w: "进攻" }, { c: "推", w: "推动" }, { c: "迅", w: "迅速" }, { c: "速", w: "速度" },
+                            { c: "退", w: "后退" }, { c: "轮", w: "轮流" }, { c: "煤", w: "煤炭" }, { c: "铁", w: "钢铁" }
+                        ]
+                    },
+                    {
+                        id: 3224, title: "课文24", chars: [
+                            { c: "必", w: "必须" }, { c: "灿", w: "灿烂" }, { c: "骑", w: "骑马" }, { c: "秒", w: "秒钟" },
+                            { c: "腿", w: "大腿" }, { c: "凶", w: "凶猛" }, { c: "猛", w: "凶猛" }, { c: "接", w: "接受" },
+                            { c: "庙", w: "庙堂" }, { c: "威", w: "威风" }, { c: "武", w: "武功" }, { c: "镇", w: "镇压" }
+                        ]
+                    },
+                    {
+                        id: 3225, title: "课文25", chars: [
+                            { c: "性", w: "性格" }, { c: "卷", w: "卷起" }, { c: "货", w: "货物" }, { c: "算", w: "计算" },
+                            { c: "夹", w: "夹住" }, { c: "夸", w: "夸奖" }, { c: "务", w: "任务" }, { c: "衬", w: "衬衫" },
+                            { c: "衫", w: "衬衫" }, { c: "负", w: "负责" }, { c: "责", w: "责任" }, { c: "艺", w: "手艺" }
+                        ]
+                    },
+                    {
+                        id: 3227, title: "课文27", chars: [
+                            { c: "漏", w: "漏水" }, { c: "喂", w: "喂食" }, { c: "胖", w: "肥胖" }, { c: "驴", w: "毛驴" },
+                            { c: "贼", w: "小偷" }, { c: "狼", w: "恶狼" }, { c: "莫", w: "莫非" }, { c: "厉", w: "厉害" },
+                            { c: "抱", w: "拥抱" }, { c: "架", w: "架子" }, { c: "胶", w: "胶水" }, { c: "粘", w: "粘贴" }, { c: "偏", w: "偏心" }
+                        ]
+                    }
+                ]
+            },
+
+            // 四五六年级...
+            "grade4_1": {
+                title: "四年级上册",
+                grade: "四年级",
+                term: "上册",
+                status: "active",
+                lessons: [
+                    {
+                        id: 4101, title: "课文1", chars: [
+                            { c: "潮", w: "潮水" }, { c: "据", w: "根据" }, { c: "堤", w: "堤坝" }, { c: "阔", w: "宽阔" },
+                            { c: "盼", w: "盼望" }, { c: "滚", w: "滚动" }, { c: "顿", w: "顿时" }, { c: "逐", w: "逐渐" },
+                            { c: "渐", w: "渐渐" }, { c: "堵", w: "堵塞" }, { c: "犹", w: "犹如" }, { c: "崩", w: "崩塌" },
+                            { c: "震", w: "震动" }, { c: "霎", w: "霎时" }, { c: "余", w: "多余" }
+                        ]
+                    },
+                    {
+                        id: 4102, title: "课文2", chars: [
+                            { c: "淘", w: "淘气" }, { c: "牵", w: "牵挂" }, { c: "鹅", w: "白鹅" }, { c: "卵", w: "鸟卵" },
+                            { c: "坑", w: "坑洼" }, { c: "洼", w: "水洼" }, { c: "填", w: "填满" }, { c: "庄", w: "庄稼" },
+                            { c: "稼", w: "庄稼" }, { c: "俗", w: "习俗" }, { c: "跃", w: "跳跃" }, { c: "葡", w: "葡萄" },
+                            { c: "萄", w: "葡萄" }, { c: "稻", w: "稻田" }, { c: "熟", w: "成熟" }
+                        ]
+                    },
+                    {
+                        id: 4105, title: "课文5", chars: [
+                            { c: "疏", w: "疏远" }, { c: "按", w: "按照" }, { c: "舒", w: "舒服" }, { c: "适", w: "适合" },
+                            { c: "暗", w: "黑暗" }, { c: "恐", w: "恐怕" }, { c: "僵", w: "僵硬" }, { c: "硬", w: "坚硬" },
+                            { c: "枪", w: "枪支" }, { c: "耐", w: "耐心" }, { c: "探", w: "探索" }, { c: "愉", w: "愉快" },
+                            { c: "曾", w: "曾经" }, { c: "沟", w: "水沟" }, { c: "溢", w: "洋溢" }
+                        ]
+                    },
+                    {
+                        id: 4106, title: "课文6", chars: [
+                            { c: "蚁", w: "蚂蚁" }, { c: "弃", w: "抛弃" }, { c: "科", w: "科学" }, { c: "横", w: "横竖" },
+                            { c: "竖", w: "竖立" }, { c: "绳", w: "绳子" }, { c: "系", w: "联系" }, { c: "姐", w: "姐妹" },
+                            { c: "证", w: "证明" }, { c: "复", w: "复习" }, { c: "研", w: "研究" }, { c: "究", w: "研究" },
+                            { c: "达", w: "到达" }, { c: "驾", w: "驾驶" }, { c: "驶", w: "行驶" }
+                        ]
+                    },
+                    {
+                        id: 4107, title: "课文7", chars: [
+                            { c: "唤", w: "呼唤" }, { c: "纪", w: "世纪" }, { c: "技", w: "技术" }, { c: "改", w: "改变" },
+                            { c: "程", w: "过程" }, { c: "超", w: "超过" }, { c: "亿", w: "亿万" }, { c: "核", w: "核心" },
+                            { c: "奥", w: "奥秘" }, { c: "益", w: "利益" }, { c: "联", w: "联合" }, { c: "质", w: "品质" },
+                            { c: "哲", w: "哲学" }, { c: "任", w: "任务" }, { c: "善", w: "善良" }
+                        ]
+                    },
+                    {
+                        id: 4109, title: "课文9", chars: [
+                            { c: "暮", w: "暮色" }, { c: "吟", w: "吟诵" }, { c: "题", w: "题目" }, { c: "侧", w: "侧面" },
+                            { c: "峰", w: "山峰" }, { c: "庐", w: "庐山" }, { c: "缘", w: "缘分" }, { c: "降", w: "降落" },
+                            { c: "费", w: "费用" }, { c: "须", w: "必须" }, { c: "逊", w: "谦逊" }, { c: "输", w: "输赢" }
+                        ]
+                    },
+                    {
+                        id: 4110, title: "课文10", chars: [
+                            { c: "虎", w: "老虎" }, { c: "操", w: "操场" }, { c: "占", w: "占领" }, { c: "嫩", w: "嫩绿" },
+                            { c: "顺", w: "顺利" }, { c: "均", w: "平均" }, { c: "叠", w: "重叠" }, { c: "隙", w: "空隙" },
+                            { c: "茎", w: "茎叶" }, { c: "柄", w: "把柄" }, { c: "萎", w: "枯萎" }, { c: "瞧", w: "瞧见" }, { c: "固", w: "固定" }
+                        ]
+                    },
+                    {
+                        id: 4111, title: "课文11", chars: [
+                            { c: "宅", w: "住宅" }, { c: "临", w: "临时" }, { c: "慎", w: "谨慎" }, { c: "选", w: "选择" },
+                            { c: "择", w: "选择" }, { c: "址", w: "地址" }, { c: "良", w: "良好" }, { c: "穴", w: "洞穴" },
+                            { c: "厅", w: "客厅" }, { c: "卧", w: "卧室" }, { c: "专", w: "专心" }, { c: "即", w: "即刻" }, { c: "较", w: "比较" }
+                        ]
+                    },
+                    {
+                        id: 4112, title: "课文12", chars: [
+                            { c: "眸", w: "眼眸" }, { c: "翻", w: "翻开" }, { c: "斧", w: "斧头" }, { c: "劈", w: "劈开" },
+                            { c: "缓", w: "缓慢" }, { c: "浊", w: "浑浊" }, { c: "丈", w: "丈夫" }, { c: "撑", w: "支撑" },
+                            { c: "踢", w: "踢球" }, { c: "累", w: "劳累" }, { c: "液", w: "液体" }, { c: "奔", w: "奔跑" },
+                            { c: "茂", w: "茂盛" }, { c: "滋", w: "滋润" }
+                        ]
+                    },
+                    {
+                        id: 4113, title: "课文13", chars: [
+                            { c: "曰", w: "子曰" }, { c: "溺", w: "溺水" }, { c: "返", w: "返回" }, { c: "衔", w: "衔接" }
+                        ]
+                    },
+                    {
+                        id: 4114, title: "课文14", chars: [
+                            { c: "悲", w: "悲伤" }, { c: "惨", w: "惨烈" }, { c: "兽", w: "野兽" }, { c: "佩", w: "佩服" },
+                            { c: "坚", w: "坚持" }, { c: "违", w: "违反" }, { c: "抗", w: "抵抗" }, { c: "环", w: "环境" },
+                            { c: "锁", w: "锁链" }, { c: "既", w: "既然" }, { c: "狠", w: "狠心" }, { c: "著", w: "著名" },
+                            { c: "愤", w: "愤怒" }, { c: "获", w: "获得" }
+                        ]
+                    },
+                    {
+                        id: 4116, title: "课文16", chars: [
+                            { c: "唉", w: "唉声" }, { c: "呆", w: "呆住" }, { c: "奈", w: "无奈" }, { c: "巢", w: "鸟巢" },
+                            { c: "齿", w: "牙齿" }, { c: "躯", w: "身躯" }, { c: "掩", w: "掩护" }, { c: "幼", w: "幼小" },
+                            { c: "搏", w: "搏斗" }, { c: "庞", w: "庞大" }, { c: "量", w: "重量" }, { c: "愣", w: "愣住" }
+                        ]
+                    },
+                    {
+                        id: 4117, title: "课文17", chars: [
+                            { c: "级", w: "年级" }, { c: "链", w: "链条" }, { c: "颤", w: "颤抖" }, { c: "攀", w: "攀登" },
+                            { c: "猴", w: "猴子" }, { c: "念", w: "思念" }, { c: "辨", w: "辨别" }, { c: "呵", w: "呵护" }
+                        ]
+                    },
+                    {
+                        id: 4118, title: "课文18", chars: [
+                            { c: "摸", w: "抚摸" }, { c: "墓", w: "坟墓" }, { c: "跪", w: "下跪" }, { c: "捶", w: "捶打" },
+                            { c: "绕", w: "环绕" }, { c: "顽", w: "顽皮" }, { c: "脖", w: "脖子" }, { c: "脱", w: "脱掉" },
+                            { c: "概", w: "大概" }, { c: "惹", w: "惹事" }, { c: "昏", w: "昏迷" }, { c: "握", w: "握手" },
+                            { c: "摔", w: "摔倒" }, { c: "凭", w: "凭借" }, { c: "掐", w: "掐住" }
+                        ]
+                    },
+                    {
+                        id: 4119, title: "课文19", chars: [
+                            { c: "班", w: "班级" }, { c: "鼓", w: "鼓励" }, { c: "殷", w: "殷切" }, { c: "俩", w: "俩人" },
+                            { c: "练", w: "练习" }, { c: "套", w: "一套" }, { c: "裤", w: "裤子" }, { c: "逃", w: "逃跑" },
+                            { c: "亏", w: "亏损" }, { c: "挖", w: "挖掘" }, { c: "撤", w: "撤退" }, { c: "堂", w: "课堂" },
+                            { c: "砸", w: "砸碎" }, { c: "锅", w: "铁锅" }
+                        ]
+                    },
+                    {
+                        id: 4120, title: "课文20", chars: [
+                            { c: "否", w: "是否" }, { c: "旋", w: "旋转" }, { c: "况", w: "情况" }, { c: "败", w: "失败" },
+                            { c: "椅", w: "椅子" }, { c: "尤", w: "尤其" }, { c: "恨", w: "仇恨" }, { c: "帅", w: "元帅" },
+                            { c: "预", w: "预备" }, { c: "溃", w: "溃败" }, { c: "品", w: "产品" }, { c: "丑", w: "丑陋" }, { c: "豪", w: "豪华" }
+                        ]
+                    },
+                    {
+                        id: 4121, title: "课文21", chars: [
+                            { c: "塞", w: "塞外" }, { c: "秦", w: "秦朝" }, { c: "征", w: "出征" }, { c: "词", w: "词语" },
+                            { c: "催", w: "催促" }, { c: "醉", w: "陶醉" }, { c: "杰", w: "杰出" }, { c: "亦", w: "亦然" },
+                            { c: "雄", w: "雄伟" }, { c: "项", w: "项目" }
+                        ]
+                    },
+                    {
+                        id: 4122, title: "课文22", chars: [
+                            { c: "肃", w: "严肃" }, { c: "默", w: "沉默" }, { c: "晌", w: "晌午" }, { c: "振", w: "振作" },
+                            { c: "胸", w: "胸怀" }, { c: "怀", w: "怀念" }, { c: "赞", w: "赞美" }, { c: "效", w: "效果" },
+                            { c: "凡", w: "平凡" }, { c: "顾", w: "照顾" }, { c: "训", w: "训练" }, { c: "斤", w: "斤两" }
+                        ]
+                    },
+                    {
+                        id: 4125, title: "课文25", chars: [
+                            { c: "戒", w: "戒备" }, { c: "尝", w: "尝试" }, { c: "诸", w: "诸位" }, { c: "竞", w: "竞争" }, { c: "唯", w: "唯一" }
+                        ]
+                    },
+                    {
+                        id: 4126, title: "课文26", chars: [
+                            { c: "豹", w: "豹子" }, { c: "派", w: "派遣" }, { c: "娶", w: "娶亲" }, { c: "媳", w: "媳妇" },
+                            { c: "妇", w: "妇女" }, { c: "淹", w: "淹没" }, { c: "逼", w: "逼迫" }, { c: "浮", w: "漂浮" },
+                            { c: "旱", w: "干旱" }, { c: "徒", w: "徒弟" }, { c: "扔", w: "扔掉" }, { c: "饶", w: "饶恕" },
+                            { c: "骗", w: "欺骗" }, { c: "灌", w: "灌溉" }, { c: "溉", w: "灌溉" }
+                        ]
+                    }
+                ]
+            },
+            "grade4_2": { title: "四年级下册", grade: "四年级", term: "下册", status: "coming", lessons: [] },
+            "grade5_1": { title: "五年级上册", grade: "五年级", term: "上册", status: "coming", lessons: [] },
+            "grade5_2": { title: "五年级下册", grade: "五年级", term: "下册", status: "coming", lessons: [] },
+            "grade6_1": { title: "六年级上册", grade: "六年级", term: "上册", status: "coming", lessons: [] },
+            "grade6_2": { title: "六年级下册", grade: "六年级", term: "下册", status: "coming", lessons: [] },
+        };
+
+        // 辅助函数
+        const getCharPinyinInWord = (word, char) => {
+            if (!word) return '';
+            const pinyinChain = HanziWriter.getScalingTransform ? null : null; // 占位
+            // 使用简单的离线字典或多音字表
+            // 这里我们主要依赖 POLYPHONE_MAP 来处理特殊发音
+            const mapKey = Object.keys(POLYPHONE_MAP).find(k => k === word);
+            if (mapKey) {
+                // 如果在多音字表中，还需要提取出对应 char 的拼音
+                // 这有点复杂，因为 map 存的是整个词的拼音。
+                // 暂时简单返回空，在这个纯前端版本里我们依赖 HanziWriter 的拼音数据（如果有的话）
+                // 或者我们手动维护一个简单的 char -> pinyin 映射
+                // *实际上 HanziWriter 不提供词语拼音 API*
+                // *所以这里通常需要引入 pinyin 库。为了保持单文件简洁，我们对于多音字直接硬编码显示*
+                // *或者，我们可以利用 Polyphone Map 来显示特殊的拼音*
+
+                const fullPinyin = POLYPHONE_MAP[word];
+                if (fullPinyin) {
+                    const idx = word.indexOf(char);
+                    if (idx !== -1) {
+                        return fullPinyin.split(' ')[idx] || '';
+                    }
+                }
+            }
+            return '';
+        };
+
+        // ==========================================
+        //               核心组件
+        // ==========================================
+
+        const App = () => {
+            // 全局状态
+            const [currentBookId, setCurrentBookId] = useState(() => localStorage.getItem('vocab_current_book') || null);
+            const [mode, setMode] = useState('shelf'); // 'shelf' (书架), 'select' (选课), 'review', 'practice', 'complete'
+
+            // 当前激活的课本数据
+            const currentBook = currentBookId ? TEXTBOOK_LIBRARY[currentBookId] : null;
+
+            // 学习状态
+            const [currentLesson, setCurrentLesson] = useState(null);
+            const [wordList, setWordList] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [favorites, setFavorites] = useState(() => {
+                try { return JSON.parse(localStorage.getItem('vocab_favorites_v3')) || []; }
+                catch { return []; }
+            });
+            // 已完成的课程 { "lessonId": true }
+            const [completedLessons, setCompletedLessons] = useState(() => {
+                try { return JSON.parse(localStorage.getItem('vocab_completed_lessons')) || {}; }
+                catch { return {}; }
+            });
+            const [wrongCount, setWrongCount] = useState(0);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [showHint, setShowHint] = useState(false);
+            const [audioIndex, setAudioIndex] = useState({});
+            const [feedback, setFeedback] = useState({ text: '', type: 'info' });
+
+            const writerRef = useRef(null);
+            const writerContainerRef = useRef(null);
+
+            // 如果有上次记录，自动进入
+            useEffect(() => {
+                const lastBook = localStorage.getItem('vocab_current_book');
+                if (lastBook && TEXTBOOK_LIBRARY[lastBook]) {
+                    setCurrentBookId(lastBook);
+                    setMode('select');
+                } else {
+                    setMode('shelf');
+                }
+
+                // 加载音频索引
+                fetch('audio/index.json').then(r => r.json()).then(setAudioIndex).catch(e => console.log('No audio index'));
+            }, []);
+
+            // 切换课本
+            const selectBook = (bookId) => {
+                if (TEXTBOOK_LIBRARY[bookId].status === 'coming') return;
+                setCurrentBookId(bookId);
+                localStorage.setItem('vocab_current_book', bookId);
+                setMode('select');
+            };
+
+            const backToShelf = () => {
+                setCurrentBookId(null);
+                localStorage.removeItem('vocab_current_book');
+                setMode('shelf');
+            };
+
+            // 安全切换模式（清理资源）
+            const safeSetMode = (newMode) => {
+                if (newMode !== 'practice') cleanupWriter();
+                setMode(newMode);
+            };
+
+            // 播放音频核心逻辑
+            const playAudio = (text, wordItem) => {
+                if (!text) return;
+                setIsPlaying(true);
+
+                // 1. 尝试本地文件 (优先用 wordItem.w，否则用 text 本身作为 key)
+                const key = wordItem ? wordItem.w : text;
+                const path = audioIndex[key];
+
+                if (path) {
+                    const audio = new Audio(path);
+                    audio.onended = () => setIsPlaying(false);
+                    audio.onerror = () => playBrowserAudio(text);
+                    audio.play().catch(() => playBrowserAudio(text));
+                } else {
+                    playBrowserAudio(text);
+                }
+            };
+
+            const playBrowserAudio = (text) => {
+                if (!window.speechSynthesis) return setIsPlaying(false);
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'zh-CN';
+                u.rate = 0.8;
+                u.onend = () => setIsPlaying(false);
+                u.onerror = () => setIsPlaying(false);
+                window.speechSynthesis.speak(u);
+            };
+
+            const speakCurrent = () => {
+                if (!wordList[currentIndex]) return;
+                const item = wordList[currentIndex];
+                // 仅仅读词语，不读任何引导语
+                playAudio(item.w, item);
+            };
+
+            // HanziWriter 逻辑 (使用外部容器，与旧版本一致)
+            const cleanupWriter = () => {
+                // 将 SVG 元素移回外部容器，避免 React DOM 冲突
+                const externalContainer = document.getElementById('hanzi-writer-container');
+                const targetEl = document.getElementById('hanzi-target');
+                if (writerRef.current && targetEl) {
+                    const svgElement = targetEl.querySelector('svg');
+                    if (svgElement && externalContainer) {
+                        externalContainer.appendChild(svgElement);
+                    }
+                    targetEl.innerHTML = '';
+                }
+                // 清理外部容器
+                if (externalContainer) {
+                    externalContainer.innerHTML = '';
+                }
+                writerRef.current = null;
+            };
+
+            const initWriter = (char) => {
+                // 先清理之前的 writer
+                const externalContainer = document.getElementById('hanzi-writer-container');
+                if (externalContainer) externalContainer.innerHTML = '';
+
+                const targetEl = document.getElementById('hanzi-target');
+                if (targetEl) targetEl.innerHTML = '';
+                if (!targetEl) return;
+
+                // 在外部容器中创建 HanziWriter
+                const newWriter = HanziWriter.create(externalContainer, char, {
+                    width: 280, height: 280, padding: 15,
+                    showOutline: false, showCharacter: false,
+                    strokeAnimationSpeed: 1, delayBetweenStrokes: 200,
+                    radicalColor: '#166534', checkStrokeOrder: true,
+                });
+
+                // 将生成的 SVG 移动到 React 视图中
+                const svgElement = externalContainer.querySelector('svg');
+                if (svgElement && targetEl) {
+                    targetEl.appendChild(svgElement);
+                }
+
+                writerRef.current = newWriter;
+                startQuiz(newWriter);
+            };
+
+            const startQuiz = (wInstance) => {
+                if (!wInstance) return;
+                setFeedback({ text: "听写中...", type: "info" });
+                wInstance.quiz({
+                    onMistake: () => {
+                        setFeedback({ text: "笔顺或位置不对", type: "error" });
+                        const c = document.getElementById('hanzi-box');
+                        if (c) { c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); }
+                        // 自动加入收藏夹
+                        const currentItem = wordList[currentIndex];
+                        if (currentItem && !favorites.find(f => f.c === currentItem.c && f.w === currentItem.w)) {
+                            const newFavs = [...favorites, currentItem];
+                            setFavorites(newFavs);
+                            localStorage.setItem('vocab_favorites_v3', JSON.stringify(newFavs));
+                        }
+                    },
+                    onCorrectStroke: () => setFeedback({ text: "正确", type: "success" }),
+                    onComplete: () => {
+                        playAudio("真棒");
+                        setFeedback({ text: "写对啦！🎉", type: "success" });
+                        // 如果是最后一个字，标记课程完成
+                        if (currentIndex >= wordList.length - 1 && currentLesson) {
+                            const newCompleted = { ...completedLessons, [currentLesson.id]: Date.now() };
+                            setCompletedLessons(newCompleted);
+                            localStorage.setItem('vocab_completed_lessons', JSON.stringify(newCompleted));
+                        }
+                    }
+                });
+            };
+
+            useEffect(() => {
+                if (mode === 'practice' && wordList[currentIndex]) {
+                    setTimeout(() => {
+                        initWriter(wordList[currentIndex].c);
+                        speakCurrent();
+                    }, 500);
+                }
+            }, [mode, currentIndex]);
+
+            const handleNext = () => {
+                if (currentIndex < wordList.length - 1) {
+                    setCurrentIndex(c => c + 1);
+                    setShowHint(false);
+                } else {
+                    safeSetMode('complete');
+                }
+            };
+
+            // 收藏逻辑
+            const toggleFavorite = (item) => {
+                const exists = favorites.find(f => f.c === item.c && f.w === item.w);
+                let newFavs;
+                if (exists) newFavs = favorites.filter(f => f !== exists);
+                else newFavs = [...favorites, item];
+                setFavorites(newFavs);
+                localStorage.setItem('vocab_favorites_v3', JSON.stringify(newFavs));
+            };
+
+            // 启动复习
+            const startLesson = (lesson) => {
+                const list = lesson.chars.map(c => ({ ...c, lesson: lesson.title }));
+                setWordList(list);
+                setCurrentLesson(lesson);
+                safeSetMode('review');
+            };
+
+            const startAllReview = () => {
+                const list = currentBook.lessons.flatMap(l => l.chars.map(c => ({ ...c, lesson: l.title })));
+                // Shuffle
+                for (let i = list.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [list[i], list[j]] = [list[j], list[i]];
+                }
+                setWordList(list);
+                setCurrentLesson({ title: "全书综合复习" });
+                safeSetMode('review');
+            };
+
+            // ================= 视图渲染 =================
+
+            // 1. 书架 (Shelf View)
+            if (mode === 'shelf') {
+                const grades = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级"];
+                return (
+                    <div className="min-h-screen p-6 max-w-5xl mx-auto">
+                        <header className="mb-10 text-center">
+                            <div className="inline-block px-4 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-bold rounded-full mb-3">
+                                📚 王一恒专属
+                            </div>
+                            <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight mb-2">小学语文生字本</h1>
+                            <p className="text-gray-500 mb-4">选择年级和课本开始学习</p>
+                            {favorites.length > 0 && (
+                                <button
+                                    onClick={() => safeSetMode('favorites')}
+                                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-6 py-2.5 rounded-full shadow-lg shadow-yellow-300 transition-all flex items-center gap-2 font-bold mx-auto border-2 border-yellow-500"
+                                >
+                                    <i className="fas fa-star"></i> 我的收藏夹
+                                    <span className="bg-yellow-600 text-white px-2 py-0.5 rounded-full text-sm">{favorites.length} 个错字</span>
+                                </button>
+                            )}
+                        </header>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {grades.map((grade, idx) => {
+                                const level = idx + 1;
+                                const book1Key = `grade${level}_1`;
+                                const book2Key = `grade${level}_2`;
+                                const book1 = TEXTBOOK_LIBRARY[book1Key];
+                                const book2 = TEXTBOOK_LIBRARY[book2Key];
+
+                                return (
+                                    <div key={grade} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                                        <div className="bg-blue-50 p-4 border-b border-blue-100">
+                                            <h3 className="text-xl font-bold text-blue-800">{grade}</h3>
+                                        </div>
+                                        <div className="p-4 flex flex-col gap-3">
+                                            {[book1, book2].map((book, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => selectBook(i === 0 ? book1Key : book2Key)}
+                                                    disabled={book.status !== 'active'}
+                                                    className={`w-full p-4 rounded-xl text-left flex justify-between items-center transition-all ${book.status === 'active'
+                                                        ? 'bg-white border-2 border-gray-100 hover:border-blue-500 hover:bg-blue-50 text-gray-800 shadow-sm'
+                                                        : 'bg-gray-50 border border-gray-100 text-gray-400 cursor-not-allowed'
+                                                        }`}
+                                                >
+                                                    <div>
+                                                        <span className="font-bold">{book.term}</span>
+                                                        {book.status === 'active' && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">已更新</span>}
+                                                    </div>
+                                                    <i className={`fas fa-${book.status === 'active' ? 'chevron-right' : 'lock'} opacity-50`}></i>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            }
+
+            // 2. 选课 (Select Lesson)
+            if (mode === 'select' && currentBook) {
+                return (
+                    <div className="min-h-screen p-4 md:p-8 max-w-6xl mx-auto">
+                        <header className="flex justify-between items-center mb-8">
+                            <button onClick={backToShelf} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium px-4 py-2 rounded-lg hover:bg-white transition">
+                                <i className="fas fa-arrow-left"></i> 切换课本
+                            </button>
+                            <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                                {currentBook.grade}{currentBook.term}
+                            </h1>
+                            <div className="flex gap-2">
+                                {favorites.length > 0 && (
+                                    <button onClick={() => safeSetMode('favorites')} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-5 py-2.5 rounded-full shadow-lg shadow-yellow-300 transition-all flex items-center gap-2 font-bold border-2 border-yellow-500">
+                                        <i className="fas fa-star"></i> 收藏夹 <span className="bg-yellow-600 text-white px-2 py-0.5 rounded-full text-sm">{favorites.length}</span>
+                                    </button>
+                                )}
+                                <button onClick={startAllReview} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 font-medium">
+                                    <i className="fas fa-play"></i> 综合复习
+                                </button>
+                            </div>
+                        </header>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {currentBook.lessons.map(lesson => {
+                                const isCompleted = !!completedLessons[lesson.id];
+                                const resetLesson = (e) => {
+                                    e.stopPropagation();
+                                    if (confirm(`确定要重置「${lesson.title}」的完成状态吗？`)) {
+                                        const newCompleted = { ...completedLessons };
+                                        delete newCompleted[lesson.id];
+                                        setCompletedLessons(newCompleted);
+                                        localStorage.setItem('vocab_completed_lessons', JSON.stringify(newCompleted));
+                                    }
+                                };
+                                return (
+                                    <div
+                                        key={lesson.id}
+                                        onClick={() => startLesson(lesson)}
+                                        className={`bg-white hover:border-blue-400 group cursor-pointer rounded-2xl p-5 border shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden ${isCompleted ? 'border-green-400 bg-green-50/30' : 'border-gray-100'}`}
+                                    >
+                                        {/* 完成标记 */}
+                                        {isCompleted && (
+                                            <div className="absolute top-2 right-2 flex items-center gap-1">
+                                                <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
+                                                    <i className="fas fa-check"></i> 已完成
+                                                </span>
+                                                <button
+                                                    onClick={resetLesson}
+                                                    className="bg-gray-200 hover:bg-red-100 text-gray-500 hover:text-red-500 w-5 h-5 rounded-full flex items-center justify-center text-xs transition-colors"
+                                                    title="重置完成状态"
+                                                >
+                                                    <i className="fas fa-undo"></i>
+                                                </button>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className={`font-bold text-lg transition-colors ${isCompleted ? 'text-green-700' : 'text-gray-800 group-hover:text-blue-600'}`}>{lesson.title}</h3>
+                                            {!isCompleted && (
+                                                <span className="bg-gray-50 text-gray-400 text-xs px-2.5 py-1 rounded-full font-mono">
+                                                    {lesson.chars.length}字
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            {lesson.chars.slice(0, 12).map((char, i) => (
+                                                <span key={i} className={`text-sm px-1.5 py-0.5 rounded ${isCompleted ? 'text-green-600 bg-green-100/50' : 'text-gray-600 bg-gray-50'}`}>{char.c}</span>
+                                            ))}
+                                        </div>
+                                    </div>)
+                            })}
+                        </div>
+                    </div>
+                );
+            }
+
+            // 3. 收藏夹 (Favorites)
+            if (mode === 'favorites') {
+                const startFavoritesReview = () => {
+                    const list = favorites.map(f => ({ ...f, lesson: '收藏夹' }));
+                    setWordList(list);
+                    setCurrentLesson({ title: "收藏夹复习" });
+                    safeSetMode('review');
+                };
+
+                return (
+                    <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto flex flex-col">
+                        <header className="flex justify-between items-center mb-6">
+                            <button onClick={() => safeSetMode(currentBook ? 'select' : 'shelf')} className="text-gray-500 hover:text-gray-900 flex items-center gap-2">
+                                <i className="fas fa-arrow-left"></i> 返回
+                            </button>
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <i className="fas fa-star text-amber-400"></i> 收藏夹
+                                <span className="text-sm text-gray-400 font-normal">({favorites.length} 个生字)</span>
+                            </h2>
+                            <button
+                                onClick={startFavoritesReview}
+                                disabled={favorites.length === 0}
+                                className="bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 text-gray-900 px-8 py-2.5 rounded-full shadow-lg shadow-yellow-300 font-bold transition-all transform hover:scale-105 disabled:scale-100 border-2 border-yellow-500 disabled:border-gray-300"
+                            >
+                                开始复习
+                            </button>
+                        </header>
+
+                        {favorites.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+                                <i className="fas fa-star text-6xl text-gray-200 mb-4"></i>
+                                <p className="text-lg">收藏夹是空的</p>
+                                <p className="text-sm mt-2">在听写时点击星星可以收藏错字</p>
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex-1 overflow-y-auto">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                                    {favorites.map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            onClick={() => playAudio(item.w, item)}
+                                            className="aspect-square flex flex-col items-center justify-center p-4 rounded-2xl bg-amber-50 hover:bg-amber-100 cursor-pointer transition-colors relative group border border-amber-100"
+                                        >
+                                            <div className="text-3xl font-bold text-gray-800 mb-1">{item.c}</div>
+                                            <div className="text-sm text-gray-400 group-hover:text-amber-600">{item.w}</div>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}
+                                                className="absolute top-2 right-2 text-sm text-amber-400 hover:text-red-500 transition-colors"
+                                                title="取消收藏"
+                                            >
+                                                <i className="fas fa-times-circle"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-6 text-center">
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('确定要清空收藏夹吗？')) {
+                                                setFavorites([]);
+                                                localStorage.setItem('vocab_favorites_v3', JSON.stringify([]));
+                                            }
+                                        }}
+                                        className="text-red-400 hover:text-red-600 text-sm"
+                                    >
+                                        <i className="fas fa-trash mr-1"></i> 清空收藏夹
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
+
+            // 4. 预览 (Review Selection)
+            if (mode === 'review') {
+                return (
+                    <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto flex flex-col">
+                        <header className="flex justify-between items-center mb-6">
+                            <button onClick={() => safeSetMode('select')} className="text-gray-500 hover:text-gray-900 flex items-center gap-2">
+                                <i className="fas fa-times text-xl"></i>
+                            </button>
+                            <h2 className="text-xl font-bold">{currentLesson.title}</h2>
+                            <button
+                                onClick={() => {
+                                    setCurrentIndex(0);
+                                    setWrongCount(0);
+                                    setShowHint(false);
+                                    safeSetMode('practice');
+                                }}
+                                className="bg-green-500 hover:bg-green-600 text-white px-8 py-2.5 rounded-full shadow-lg shadow-green-200 font-bold transition-all transform hover:scale-105"
+                            >
+                                开始听写
+                            </button>
+                        </header>
+
+                        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex-1 overflow-y-auto">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                                {wordList.map((item, idx) => (
+                                    <div
+                                        key={idx}
+                                        onClick={() => playAudio(item.w, item)}
+                                        className="aspect-square flex flex-col items-center justify-center p-4 rounded-2xl bg-gray-50 hover:bg-blue-50 cursor-pointer transition-colors relative group"
+                                    >
+                                        <div className="text-3xl font-bold text-gray-800 mb-1">{item.c}</div>
+                                        <div className="text-sm text-gray-400 group-hover:text-blue-500">{item.w}</div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}
+                                            className={`absolute top-2 right-2 text-sm ${favorites.find(f => f.c === item.c) ? 'text-amber-400' : 'text-gray-200 group-hover:text-gray-300'}`}
+                                        >
+                                            <i className="fas fa-star"></i>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 4. 听写 (Practice) - 与旧版本一致的布局
+            if (mode === 'practice') {
+                const currentItem = wordList[currentIndex];
+                if (!currentItem) return null;
+
+                const isFav = favorites.some(f => f.c === currentItem.c);
+                const displayWord = currentItem.w ? currentItem.w.replace(currentItem.c, '□') : '听写';
+                const pinyin = getCharPinyinInWord(currentItem.w, currentItem.c);
+
+                const handlePrev = () => {
+                    if (currentIndex > 0) {
+                        setCurrentIndex(c => c - 1);
+                        setShowHint(false);
+                    }
+                };
+
+                return (
+                    <div key={`practice-page-${mode}`} className="min-h-screen flex flex-col items-center pt-2 px-2 max-w-2xl mx-auto relative bg-white safe-area-bottom">
+                        {/* 顶部导航栏 */}
+                        <div className="w-full flex justify-between items-center mb-2 border-b pb-2 px-2">
+                            <button onClick={() => safeSetMode('review')} className="text-gray-500 text-sm flex items-center">
+                                <i className="fas fa-arrow-left mr-1"></i>退出
+                            </button>
+                            <div className="text-gray-800 font-bold text-lg">{currentIndex + 1} <span className="text-gray-400 text-sm">/ {wordList.length}</span></div>
+                            <button onClick={() => toggleFavorite(currentItem)} className={`p-2 rounded-full transition-colors ${isFav ? 'text-yellow-500 bg-yellow-50' : 'text-gray-300'}`}>
+                                <i className={`fas fa-star ${isFav ? '' : 'far'}`}></i>
+                            </button>
+                        </div>
+
+                        <div className="w-full flex flex-row items-stretch gap-3 flex-1 overflow-hidden">
+                            <div className="flex-1 flex flex-col items-center">
+                                {/* 播报区 */}
+                                <div onClick={speakCurrent} className={`w-full bg-blue-50 border-2 border-blue-100 rounded-2xl py-3 mb-3 flex flex-col items-center justify-center cursor-pointer active:bg-blue-100 transition-all ${isPlaying ? 'border-blue-400 shadow-md transform scale-[1.02]' : ''}`}>
+                                    <div className="text-xl text-blue-500 font-bold mb-1 font-mono h-6">
+                                        {pinyin}
+                                    </div>
+                                    <h2 className="text-4xl font-bold text-gray-800 tracking-widest mb-1">{displayWord}</h2>
+                                    <div className="flex items-center text-blue-600 text-xs font-bold mt-1">
+                                        <i className={`fas ${isPlaying ? 'fa-volume-high animate-pulse' : 'fa-volume-low'} mr-1`}></i>
+                                        {isPlaying ? "播放中..." : "点击播报"}
+                                    </div>
+                                </div>
+
+                                {/* 反馈文字 */}
+                                <div className={`mb-3 px-4 py-1 rounded-full text-sm font-bold transition-all ${feedback.type === 'error' ? 'text-red-600 bg-red-50' : feedback.type === 'success' ? 'text-green-600 bg-green-50' : 'text-gray-400'}`}>
+                                    {feedback.text}
+                                </div>
+
+                                {/* 田字格写字区 - 整个区域使用固定尺寸的占位容器 */}
+                                <div style={{ width: '333px', height: '280px', position: 'relative' }}>
+                                    {/* 左侧辅助按钮 - 绝对定位但在固定容器内 */}
+                                    <div style={{ position: 'absolute', left: 0, bottom: 0, width: '40px' }}>
+                                        <div className="flex flex-col gap-3">
+                                            <button onClick={() => { if (writerRef.current) writerRef.current.animateCharacter(); }} className="w-10 h-10 bg-white rounded-full shadow-md border flex items-center justify-center text-yellow-500 active:text-yellow-600" title="演示笔顺">
+                                                <i className="fas fa-video"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {/* 田字格 - 绝对定位在右侧 */}
+                                    <div id="hanzi-box" style={{ position: 'absolute', right: 0, top: 0, width: '280px', height: '280px' }} className="hanzi-container border-[3px] border-gray-200 rounded-2xl shadow-inner">
+                                        <div id="hanzi-target" key={`writer-${currentIndex}-${currentItem.c}`} className="w-full h-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 右侧控制按钮 */}
+                            <div className="flex flex-col gap-2 justify-center w-16 shrink-0">
+                                <button onClick={handlePrev} disabled={currentIndex === 0} className="h-16 bg-gray-50 text-gray-600 rounded-xl flex items-center justify-center disabled:opacity-30 border border-gray-200 active:bg-gray-200">
+                                    <i className="fas fa-chevron-left text-xl"></i>
+                                </button>
+                                <button onClick={() => initWriter(currentItem.c)} className="h-16 bg-gray-50 text-gray-600 rounded-xl flex flex-col items-center justify-center text-xs font-bold border border-gray-200 active:bg-gray-200">
+                                    <i className="fas fa-rotate-left mb-1"></i>重写
+                                </button>
+                                <button onClick={handleNext} className="h-24 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-md active:scale-95 transition-transform active:bg-blue-700">
+                                    <i className="fas fa-chevron-right text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 5. 完成 (Complete)
+            if (mode === 'complete') {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center bg-white p-8">
+                        <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm">
+                            <i className="fas fa-check"></i>
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-800 mb-2">听写完成</h2>
+                        <p className="text-gray-500 mb-8">本次练习共 {wordList.length} 个生字</p>
+                        <div className="flex gap-4">
+                            <button onClick={() => safeSetMode('select')} className="px-8 py-3 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition">返回课本</button>
+                            <button
+                                onClick={() => { setCurrentIndex(0); setWrongCount(0); safeSetMode('practice'); }}
+                                className="px-8 py-3 rounded-full bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition"
+                            >
+                                再练一次
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 6. 兜底 (Fallback / Loading)
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400 p-8 text-center">
+                    <div>
+                        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+                        <h3 className="text-xl font-bold text-gray-700 mb-2">正在加载资源...</h3>
+                        <p className="text-sm mb-6">如果长时间停留在此页面，可能是数据加载异常。</p>
+
+                        <div className="bg-gray-100 p-4 rounded text-left text-xs font-mono mb-6">
+                            <p>Mode: {mode}</p>
+                            <p>BookId: {currentBookId || 'null'}</p>
+                            <p>BookLoaded: {currentBook ? 'Yes' : 'No'}</p>
+                        </div>
+
+                        <button
+                            onClick={() => { localStorage.clear(); window.location.reload(); }}
+                            className="px-6 py-2 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 text-sm"
+                        >
+                            清除缓存并重试
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
