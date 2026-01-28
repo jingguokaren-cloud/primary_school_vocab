@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>王一恒小学语文生字听写</title>
+    <title>小学语文生字听写</title>
 
     <!-- BootCDN 国内最稳定CDN -->
     <script src="https://cdn.bootcdn.net/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -43,6 +43,7 @@
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             background-color: #f3f4f6;
+            padding-top: 20px;
         }
 
         .animate-fade-in {
@@ -226,6 +227,11 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
+
+        // ==========================================
+        //         白名单配置 (Whitelist)
+        // ==========================================
+        const ALLOWED_USERS = ['王一恒', '刘彦泽', '王一昕'];
 
         // ==========================================
         //              数据中心 (Data Center)
@@ -1882,6 +1888,11 @@
         // ==========================================
 
         const App = () => {
+            // 登录状态
+            const [currentUser, setCurrentUser] = useState(() => localStorage.getItem('vocab_current_user') || null);
+            const [loginInput, setLoginInput] = useState('');
+            const [loginError, setLoginError] = useState('');
+
             // 全局状态
             const [currentBookId, setCurrentBookId] = useState(() => localStorage.getItem('vocab_current_book') || null);
             const [mode, setMode] = useState('shelf'); // 'shelf' (书架), 'select' (选课), 'review', 'practice', 'complete'
@@ -2108,16 +2119,79 @@
 
             // ================= 视图渲染 =================
 
+            // 登录验证函数
+            const handleLogin = () => {
+                const name = loginInput.trim();
+                if (ALLOWED_USERS.includes(name)) {
+                    setCurrentUser(name);
+                    localStorage.setItem('vocab_current_user', name);
+                    setLoginError('');
+                    document.title = name + '小学语文生字听写';
+                } else {
+                    setLoginError('姓名未在名单中，请重新输入');
+                }
+            };
+
+            // 退出登录
+            const handleLogout = () => {
+                setCurrentUser(null);
+                localStorage.removeItem('vocab_current_user');
+                setLoginInput('');
+                document.title = '小学语文生字听写';
+            };
+
+            // 更新页面标题
+            useEffect(() => {
+                if (currentUser) {
+                    document.title = currentUser + '小学语文生字听写';
+                }
+            }, [currentUser]);
+
+            // 0. 登录页面 (Login View)
+            if (!currentUser) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+                        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+                            <div className="text-6xl mb-4">📚</div>
+                            <h1 className="text-3xl font-extrabold text-gray-800 mb-2">小学语文生字本</h1>
+                            <p className="text-gray-500 mb-8">请输入你的姓名开始学习</p>
+
+                            <input
+                                type="text"
+                                value={loginInput}
+                                onChange={(e) => { setLoginInput(e.target.value); setLoginError(''); }}
+                                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                placeholder="请输入姓名"
+                                className="w-full px-6 py-4 text-xl text-center border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none mb-4 transition-colors"
+                                autoFocus
+                            />
+
+                            {loginError && (
+                                <div className="text-red-500 mb-4 font-medium">
+                                    <i className="fas fa-exclamation-circle mr-2"></i>{loginError}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handleLogin}
+                                className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xl font-bold py-4 rounded-2xl hover:from-blue-600 hover:to-indigo-600 transition-all shadow-lg shadow-blue-200"
+                            >
+                                开始学习 <i className="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
             // 1. 书架 (Shelf View)
             if (mode === 'shelf') {
                 const grades = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级"];
                 return (
                     <div className="min-h-screen p-6 max-w-5xl mx-auto">
                         <header className="mb-10 text-center">
-                            <div className="inline-block px-4 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-bold rounded-full mb-3">
-                                📚 王一恒专属
+                            <div className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-3xl font-bold rounded-full mb-6 cursor-pointer hover:opacity-80 shadow-lg shadow-indigo-300 animate-pulse" onClick={handleLogout} title="点击切换用户">
+                                ⭐ {currentUser}专属 ⭐
                             </div>
-                            <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight mb-2">小学语文生字本</h1>
                             <p className="text-gray-500 mb-4">选择年级和课本开始学习</p>
                             {favorites.length > 0 && (
                                 <button
