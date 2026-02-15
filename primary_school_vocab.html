@@ -266,7 +266,7 @@
         //              数据中心 (Data Center)
         // ==========================================
 
-        // 词语拼音表 (包含多音字和常用词)
+        // 词语拼音表 (包含多音字和常用词)  
         const POLYPHONE_MAP = {
             // 多音字
             '挑战': 'tiǎo zhàn', '挑选': 'tiāo xuǎn',
@@ -2274,63 +2274,81 @@
                 const targetEl = document.getElementById('hanzi-target');
                 if (targetEl) targetEl.innerHTML = '';
                 if (!targetEl) return;
+                if (!char) return;
 
-                // 在外部容器中创建 HanziWriter
-                const newWriter = HanziWriter.create(externalContainer, char, {
-                    width: 280, height: 280, padding: 15,
-                    showOutline: false, showCharacter: false,
-                    strokeAnimationSpeed: 1, delayBetweenStrokes: 200,
-                    radicalColor: '#166534', checkStrokeOrder: true,
-                });
+                try {
+                    // 在外部容器中创建 HanziWriter
+                    const newWriter = HanziWriter.create(externalContainer, char, {
+                        width: 280, height: 280, padding: 15,
+                        showOutline: false, showCharacter: false,
+                        strokeAnimationSpeed: 1, delayBetweenStrokes: 200,
+                        radicalColor: '#166534', checkStrokeOrder: true,
+                        onLoadCharDataError: function (reason) {
+                            console.warn('HanziWriter 加载字符数据失败:', char, reason);
+                            setFeedback({ text: '"' + char + '" 字符数据加载失败，请检查网络', type: 'error' });
+                        }
+                    });
 
-                // 将生成的 SVG 移动到 React 视图中
-                const svgElement = externalContainer.querySelector('svg');
-                if (svgElement && targetEl) {
-                    targetEl.appendChild(svgElement);
+                    // 将生成的 SVG 移动到 React 视图中
+                    const svgElement = externalContainer.querySelector('svg');
+                    if (svgElement && targetEl) {
+                        targetEl.appendChild(svgElement);
+                    }
+
+                    writerRef.current = newWriter;
+                    startQuiz(newWriter);
+                } catch (err) {
+                    console.error('HanziWriter 初始化失败:', char, err);
+                    setFeedback({ text: '"' + char + '" 初始化失败，请刷新重试', type: 'error' });
                 }
-
-                writerRef.current = newWriter;
-                startQuiz(newWriter);
             };
 
             const startQuiz = (wInstance) => {
                 if (!wInstance) return;
                 setFeedback({ text: "听写中...", type: "info" });
-                wInstance.quiz({
-                    onMistake: () => {
-                        setFeedback({ text: "笔顺或位置不对", type: "error" });
-                        const c = document.getElementById('hanzi-box');
-                        if (c) { c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); }
-                        // 自动加入收藏夹
-                        const currentItem = wordList[currentIndex];
-                        if (currentItem && !favorites.find(f => f.c === currentItem.c && f.w === currentItem.w)) {
-                            const newFavs = [...favorites, currentItem];
-                            setFavorites(newFavs);
-                            localStorage.setItem('vocab_favorites_v3', JSON.stringify(newFavs));
+                try {
+                    wInstance.quiz({
+                        onMistake: () => {
+                            setFeedback({ text: "笔顺或位置不对", type: "error" });
+                            const c = document.getElementById('hanzi-box');
+                            if (c) { c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); }
+                            // 自动加入收藏夹
+                            const currentItem = wordList[currentIndex];
+                            if (currentItem && !favorites.find(f => f.c === currentItem.c && f.w === currentItem.w)) {
+                                const newFavs = [...favorites, currentItem];
+                                setFavorites(newFavs);
+                                localStorage.setItem('vocab_favorites_v3', JSON.stringify(newFavs));
+                            }
+                        },
+                        onCorrectStroke: () => setFeedback({ text: "正确", type: "success" }),
+                        onComplete: () => {
+                            playAudio("真棒");
+                            setFeedback({ text: "写对啦！🎉", type: "success" });
+                            // 如果是最后一个字，标记课程完成
+                            if (currentIndex >= wordList.length - 1 && currentLesson) {
+                                const newCompleted = { ...completedLessons, [currentLesson.id]: Date.now() };
+                                setCompletedLessons(newCompleted);
+                                localStorage.setItem('vocab_completed_lessons', JSON.stringify(newCompleted));
+                            }
                         }
-                    },
-                    onCorrectStroke: () => setFeedback({ text: "正确", type: "success" }),
-                    onComplete: () => {
-                        playAudio("真棒");
-                        setFeedback({ text: "写对啦！🎉", type: "success" });
-                        // 如果是最后一个字，标记课程完成
-                        if (currentIndex >= wordList.length - 1 && currentLesson) {
-                            const newCompleted = { ...completedLessons, [currentLesson.id]: Date.now() };
-                            setCompletedLessons(newCompleted);
-                            localStorage.setItem('vocab_completed_lessons', JSON.stringify(newCompleted));
-                        }
-                    }
-                });
+                    });
+                } catch (err) {
+                    console.error('HanziWriter quiz 启动失败:', err);
+                    setFeedback({ text: "听写启动失败，请重试", type: "error" });
+                }
             };
 
             useEffect(() => {
-                if (mode === 'practice' && wordList[currentIndex]) {
+                if (mode === 'practice' && wordList.length > 0 && wordList[currentIndex]) {
+                    const item = wordList[currentIndex];
                     setTimeout(() => {
-                        initWriter(wordList[currentIndex].c);
-                        speakCurrent();
+                        if (item && item.c) {
+                            initWriter(item.c);
+                            speakCurrent();
+                        }
                     }, 500);
                 }
-            }, [mode, currentIndex]);
+            }, [mode, currentIndex, wordList]);
 
             const handleNext = () => {
                 if (currentIndex < wordList.length - 1) {
